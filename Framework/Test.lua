@@ -56,7 +56,7 @@ local function generateTestWrapper(test, toInject)
   return _injecting
 end
 
-function testmt.__index:Run(injectedEnv)
+function testmt.__index:Run(injectedEnv, verbose, doStackTrace)
   expect(1, injectedEnv, "table")
   local wrapperInjection = generateTestWrapper(self, injectedEnv)
 
@@ -84,7 +84,12 @@ function testmt.__index:Run(injectedEnv)
       end
     end,
     function()
-      local ok, err = xpcall(self.func, debug.traceback)
+      local ok, err
+      if doStackTrace then
+        ok, err = xpcall(self.func, debug.traceback)
+      else
+        ok, err = pcall(self.func)
+      end
       if not ok then
         self:Error(err)
         self:Stop()

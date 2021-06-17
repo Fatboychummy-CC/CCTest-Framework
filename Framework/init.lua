@@ -21,6 +21,7 @@ end
 local module = {
   loaded = {},
   tests = {},
+  disabled = 0
 }
 
 local expect = require "cc.expect".expect
@@ -155,10 +156,52 @@ local function splitOn(a, b)
   return t
 end
 
-function module.runAllTests()
-  for i = 1, #module.tests do
-    module.runSuite(module.tests[i])
+local function parseArgs(...)
+  local args = table.pack(...)
+
+  local data = {
+    flags = {},
+    args = {}
+  }
+
+  for i = 1, args.n do
+    local arg = args[i]
+    if arg:match("^%-%a") then -- flag, add to flags list
+      for i = 2, #arg do
+        data.flags[arg:sub(i, i):lower()] = true
+      end
+    elseif arg:match("^%-%-.+") then -- big-flag
+      data.flags[arg:sub(3):lower()] = true
+    else -- not a flag, just throw it in the arg list.
+      data.args[#data.args + 1] = arg
+    end
   end
+
+  return data
+end
+
+function module.runAllTests(...)
+  local args = parseArgs(...)
+  local doStackTrace = args.flags.s or args.flags["stack-trace"]
+  local verbose      = args.flags.v or args.flags.verbose
+
+  local function verbosePrint(...)
+    if verbose then
+      print(...)
+    end
+  end
+
+  verbosePrint("Verbose logging enabled.")
+  if doStackTrace then
+    verbosePrint("Stack-trace enabled.")
+  end
+
+  verbosePrint("Running all suites.")
+  for i = 1, #module.tests do
+    module.runSuite(module.tests[i], verbose, doStackTrace)
+  end
+
+  verbosePrint("Done running suites. Sorting results.")
 
   local total, inSuites = countTests()
   if total == 0 then
@@ -194,9 +237,15 @@ function module.runAllTests()
       end
     end
   end
+
+  if module.disabled > 0 then
+    verbosePrint()
+    term.setTextColor(colors.yellow)
+    verbosePrint(string.format("%d test%s disabled.", module.disabled, module.disabled > 1 and "s are" or " is"))
+  end
 end
 
-function module.runSuite(s)
+function module.runSuite(s, verbose, doStackTrace)
   local fg, bg, txt = "0000000%s",
                       "fffffff%s",
                       "Suite: %s"
@@ -213,7 +262,7 @@ function module.runSuite(s)
         end
       end,
       function()
-        currentTest:Run(toInject)
+        currentTest:Run(toInject, verbose, doStackTrace)
       end
     )
 
@@ -222,6 +271,8 @@ function module.runSuite(s)
   end
   print()
 end
+
+_G.DISABLED = {} --
 
 function module.newSuite(suiteName)
   local suite = {finished = false, name = suiteName}
@@ -242,6 +293,10 @@ function module.newSuite(suiteName)
   -- Load the body, then create the test and add it to the suite.
   loadBody = function(f)
     if type(f) == "table" then
+      if f == DISABLED then
+        module.disabled = module.disabled + 1
+        return loadName
+      end
       f = f[1]
     end
     expect(1, f, "table", "function")
