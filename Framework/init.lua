@@ -38,6 +38,12 @@ function _G.DUMMY_TERMINATE() -- global for terminating but not killing the prog
 end
 
 
+local function verbosePrint(...)
+  if verbose then
+    print(...)
+  end
+end
+
 -- This functions builds the info line for the current test, ie:
 -- [ RUN ] testName
 -- [ FAIL] testName
@@ -53,12 +59,12 @@ local function buildInfoLine(name, status)
   local formatBG = "f%sfff%s"
   local statusString, statusFG, statusBG
   if status == Test.STATUS.LOADED then
-    statusString = "LOAD "
-    statusFG = "00000"
+    statusString = " RDY "
+    statusFG = "99999"
     statusBG = "fffff"
   elseif status == Test.STATUS.LOADING then
     statusString = "LDING"
-    statusFG = "00000"
+    statusFG = "88888"
     statusBG = "fffff"
   elseif status == Test.STATUS.RUNNING then
     statusString = " RUN "
@@ -193,12 +199,6 @@ function module.runAllTests(...)
   local doStackTrace = args.flags.s or args.flags["stack-trace"]
   local verbose      = args.flags.v or args.flags.verbose
 
-  local function verbosePrint(...)
-    if verbose then
-      print(...)
-    end
-  end
-
   verbosePrint("Verbose logging enabled.")
   if doStackTrace then
     verbosePrint("Stack-trace enabled.")
@@ -261,10 +261,29 @@ function module.runSuite(s, verbose, doStackTrace)
   print()print()
   for i = 1, #s do
     local currentTest = s[i]
+    local terminated = false
+    local x, y = term.getCursorPos()
+    local w = window.create(term.current(), 0, 0, 1, 1)
+    local _, my = term.getSize()
+    local oldTerm = term.redirect(w)
+
+
     parallel.waitForAny(
       function()
         while true do
+          term.redirect(oldTerm)
+          if verbose then
+            y = y + 1
+            if y > my then
+              y = my
+              term.scroll(1)
+            end
+          end
+          term.setCursorPos(x, y)
           writeInfo(currentTest)
+          verbosePrint()
+          term.redirect(w)
+
           local ev, a1 = os.pullEventRaw("test_checkpoint")
 
           if ev == "terminate" and a1 ~= dummyTerminate then
@@ -273,10 +292,11 @@ function module.runSuite(s, verbose, doStackTrace)
         end
       end,
       function()
-        currentTest:Run(toInject, verbose, doStackTrace)
+        currentTest:Run(toInject, verbose, doStackTrace, w)
       end
     )
 
+    term.redirect(oldTerm)
     if terminated then
       error("Terminated testing.")
     end

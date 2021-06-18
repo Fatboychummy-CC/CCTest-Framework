@@ -56,8 +56,10 @@ local function generateTestWrapper(test, toInject)
   return _injecting
 end
 
-function testmt.__index:Run(injectedEnv, verbose, doStackTrace)
+function testmt.__index:Run(injectedEnv, verbose, doStackTrace, redirectObj)
   expect(1, injectedEnv, "table")
+  self.status = test.STATUS.LOADED
+  checkpoint()
   local wrapperInjection = generateTestWrapper(self, injectedEnv)
 
   for k, v in pairs(wrapperInjection) do
@@ -68,11 +70,6 @@ function testmt.__index:Run(injectedEnv, verbose, doStackTrace)
   self.status = test.STATUS.RUNNING
 
   checkpoint()
-
-  local x, y = term.getCursorPos()
-  local w = window.create(term.current(), x, y, 1, 1)
-
-  local old = term.redirect(w)
 
   parallel.waitForAny(
     function()
@@ -98,9 +95,6 @@ function testmt.__index:Run(injectedEnv, verbose, doStackTrace)
       end
     end
   )
-
-  term.redirect(old)
-  term.setCursorPos(x, y)
 
   for k in pairs(wrapperInjection) do
     _ENV[k] = nil
