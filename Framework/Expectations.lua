@@ -53,7 +53,7 @@ function M.EVENT(f, event, timeout, ...)
 
   local tmr = os.startTimer(timeout or 0.25)
   while true do
-    local ev = table.pack(os.pullEvent())
+    local ev = table.pack(os.pullEventRaw())
     if ev[1] == "timer" and ev[2] == tmr then
       return false, string.format("Timed out before receiving event '%s'.", event)
     elseif ev[1] == event then

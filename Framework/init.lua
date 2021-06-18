@@ -29,6 +29,14 @@ local strings = require "cc.strings"
 local Expectations = require(modulesPath .. "Expectations")
 local Test = require(modulesPath .. "Test")
 local toInject = {}
+local dummyTerminate = "DUMMY"
+
+_G.DISABLED = {} -- global for disabled test
+
+function _G.DUMMY_TERMINATE() -- global for terminating but not killing the program.
+  return "terminate", dummyTerminate
+end
+
 
 -- This functions builds the info line for the current test, ie:
 -- [ RUN ] testName
@@ -257,8 +265,11 @@ function module.runSuite(s, verbose, doStackTrace)
       function()
         while true do
           writeInfo(currentTest)
+          local ev, a1 = os.pullEventRaw("test_checkpoint")
 
-          os.pullEvent("test_checkpoint")
+          if ev == "terminate" and a1 ~= dummyTerminate then
+            error("Terminated testing.", 0)
+          end
         end
       end,
       function()
@@ -266,13 +277,15 @@ function module.runSuite(s, verbose, doStackTrace)
       end
     )
 
+    if terminated then
+      error("Terminated testing.")
+    end
+
     writeInfo(currentTest)
     finishTest(currentTest)
   end
   print()
 end
-
-_G.DISABLED = {} --
 
 function module.newSuite(suiteName)
   local suite = {finished = false, name = suiteName}

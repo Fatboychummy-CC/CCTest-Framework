@@ -29,7 +29,7 @@ end
 
 local function checkpoint()
   os.queueEvent("test_checkpoint")
-  os.pullEvent("test_checkpoint")
+  os.pullEventRaw("test_checkpoint")
 end
 
 local function generateTestWrapper(test, toInject)
@@ -77,7 +77,7 @@ function testmt.__index:Run(injectedEnv, verbose, doStackTrace)
   parallel.waitForAny(
     function()
       while true do
-        os.pullEvent("test_checkpoint")
+        os.pullEventRaw("test_checkpoint")
         if self.running == false then
           return
         end
