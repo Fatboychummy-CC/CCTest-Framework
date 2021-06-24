@@ -27,9 +27,9 @@ function testmt.__index:Stop()
   self.running = false
 end
 
-local function checkpoint()
-  os.queueEvent("test_checkpoint")
-  os.pullEventRaw("test_checkpoint")
+local function checkpoint(checkpointType)
+  os.queueEvent("test_checkpoint", checkpointType)
+  os.pullEventRaw("test_checkpoint") -- allow for other coroutines to update.
 end
 
 local function generateTestWrapper(test, toInject)
@@ -49,7 +49,7 @@ local function generateTestWrapper(test, toInject)
       end
 
       -- allow switching between running functions, and termination.
-      checkpoint()
+      checkpoint(k)
     end
   end
 
@@ -59,7 +59,7 @@ end
 function testmt.__index:Run(injectedEnv, verbose, doStackTrace, redirectObj)
   expect(1, injectedEnv, "table")
   self.status = test.STATUS.LOADED
-  checkpoint()
+  checkpoint("INIT")
   local wrapperInjection = generateTestWrapper(self, injectedEnv)
 
   for k, v in pairs(wrapperInjection) do
@@ -69,7 +69,7 @@ function testmt.__index:Run(injectedEnv, verbose, doStackTrace, redirectObj)
   self.running = true
   self.status = test.STATUS.RUNNING
 
-  checkpoint()
+  checkpoint("INITTED")
 
   parallel.waitForAny(
     function()
@@ -100,7 +100,7 @@ function testmt.__index:Run(injectedEnv, verbose, doStackTrace, redirectObj)
     _ENV[k] = nil
   end
 
-  checkpoint()
+  checkpoint("END")
 
   return self
 end

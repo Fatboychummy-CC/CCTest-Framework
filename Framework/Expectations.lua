@@ -87,6 +87,21 @@ function M.LTE(a, b)
 end
 
 function M.DEEP_TABLE_EQ(a, b)
+  local mt = getmetatable(a)
+  if mt and mt.__pairs then
+    local ok = pcall(pairs, a)
+    if not ok then
+      return false, "Cannot step through table input a: __pairs is overridden and generates an error when called."
+    end
+  end
+  mt = nil
+  mt = getmetatable(b)
+  if mt and mt.__pairs then
+    local ok = pcall(pairs, b)
+    if not ok then
+      return false, "Cannot step through table input b: __pairs is overridden and generates an error when called."
+    end
+  end
   local ok, e = expect(1, a, "table")
     if not ok then return false, e end
   local ok2, e2 = expect(2, b, "table")

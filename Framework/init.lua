@@ -30,6 +30,8 @@ local Expectations = require(modulesPath .. "Expectations")
 local Test = require(modulesPath .. "Test")
 local toInject = {}
 local dummyTerminate = "DUMMY"
+local verbose = false
+local hasVPrinted = false
 
 _G.DISABLED = {} -- global for disabled test
 
@@ -38,8 +40,12 @@ function _G.DUMMY_TERMINATE() -- global for terminating but not killing the prog
 end
 
 
-local function verbosePrint(...)
+function _G.verbosePrint(...)
   if verbose then
+    if not hasVPrinted then
+      print()
+      hasVPrinted = true
+    end
     print(...)
   end
 end
@@ -194,10 +200,25 @@ local function parseArgs(...)
   return data
 end
 
+local function setVerbose(v)
+  expect(1, v, "boolean")
+  verbose = v
+end
+
+local function printDisabled()
+  if module.disabled > 0 then
+    print()
+    term.setTextColor(colors.yellow)
+    print(string.format("%d test%s disabled.", module.disabled, module.disabled > 1 and "s are" or " is"))
+  end
+end
+
 function module.runAllTests(...)
   local args = parseArgs(...)
   local doStackTrace = args.flags.s or args.flags["stack-trace"]
-  local verbose      = args.flags.v or args.flags.verbose
+  verbose      = args.flags.v or args.flags.verbose
+
+  local startingTerm = term.current()
 
   verbosePrint("Verbose logging enabled.")
   if doStackTrace then
@@ -209,11 +230,14 @@ function module.runAllTests(...)
     module.runSuite(module.tests[i], verbose, doStackTrace)
   end
 
+  term.redirect(startingTerm) -- ensure we got back to the original term.
+
   verbosePrint("Done running suites. Sorting results.")
 
   local total, inSuites = countTests()
   if total == 0 then
     print("All tests passed.")
+    printDisabled()
     return
   end
 
@@ -246,11 +270,7 @@ function module.runAllTests(...)
     end
   end
 
-  if module.disabled > 0 then
-    verbosePrint()
-    term.setTextColor(colors.yellow)
-    verbosePrint(string.format("%d test%s disabled.", module.disabled, module.disabled > 1 and "s are" or " is"))
-  end
+  printDisabled()
 end
 
 function module.runSuite(s, verbose, doStackTrace)
@@ -266,7 +286,9 @@ function module.runSuite(s, verbose, doStackTrace)
     local w = window.create(term.current(), 0, 0, 1, 1)
     local _, my = term.getSize()
     local oldTerm = term.redirect(w)
-
+    if verbose then
+      term.redirect(oldTerm)
+    end
 
     parallel.waitForAny(
       function()
@@ -281,13 +303,19 @@ function module.runSuite(s, verbose, doStackTrace)
           end
           term.setCursorPos(x, y)
           writeInfo(currentTest)
-          verbosePrint()
-          term.redirect(w)
+          
+          if not verbose then
+            term.redirect(w)
+          end
 
+          hasVPrinted = false
           local ev, a1 = os.pullEventRaw("test_checkpoint")
 
           if ev == "terminate" and a1 ~= dummyTerminate then
             error("Terminated testing.", 0)
+          end
+          if verbose then
+            write(" ## " .. tostring(a1))
           end
         end
       end,
