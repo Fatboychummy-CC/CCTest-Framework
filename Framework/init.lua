@@ -24,8 +24,28 @@ local module = {
   disabled = 0
 }
 
-local expect = require "cc.expect".expect
-local strings = require "cc.strings"
+local function badModule(module, versionMinimum)
+  local dir = fs.getDir(shell.getRunningProgram())
+  term.setTextColor(colors.orange)
+  print(string.format("Module '%s' does not exist on pre-%s minecraft versions. This test framework will not work on your version of minecraft without doing the following:", module, versionMinimum))
+  print()
+  print("1.", "Go to https://github.com/Squiddev-CC/CC-Tweaked")
+  print("2.", string.format("Click 'Go To File', and search for '%s.lua'.", module:gsub("%.", "/")))
+  print("3.", "Click 'Raw', then copy the link.")
+  print("4.", string.format("Run 'wget LINK_HERE %s/%s.lua'", dir, module:gsub("%.", "/")))
+  print()
+  error("Missing core modules.", 0)
+end
+
+local ok, strings = pcall(require, "cc.strings")
+if not ok then
+  badModule("cc.strings", "1.16")
+end
+local ok2, expect = pcall(require, "cc.expect")
+if not ok2 then
+  badModule("cc.expect", "1.12")
+end
+expect = expect.expect
 local Expectations = require(modulesPath .. "Expectations")
 local Test = require(modulesPath .. "Test")
 local toInject = {}
@@ -303,7 +323,7 @@ function module.runSuite(s, verbose, doStackTrace)
           end
           term.setCursorPos(x, y)
           writeInfo(currentTest)
-          
+
           if not verbose then
             term.redirect(w)
           end
