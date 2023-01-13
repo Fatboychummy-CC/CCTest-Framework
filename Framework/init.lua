@@ -15,8 +15,6 @@ for i = #modulesPath, 1, -1 do
   end
 end
 
----@class test
-
 ---@class suite
 
 local module = {
