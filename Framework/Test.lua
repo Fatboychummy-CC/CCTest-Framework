@@ -1,7 +1,21 @@
 local expect = require "cc.expect".expect
 
--- small test object
+---@class test
+---@field status test_status
+---@field name string The name of the test
+---@field suite string The name of the suite this test is in.
+---@field reason string[] The fail message of the last failure that occurred during the test.
+---@field error string[] The error message of the last error that occurred during the test.
+---@field running boolean Whether the test is currently running or not.
+---@field func fun() The function to test.
+---@field Fail fun(reason:string) Fail the test given a reason.
+---@field Error fun(reason:string) Fail the test with a given error.
+---@field Ok fun() Test status is OK after running.
+---@field Stop fun() Stop running the test.
+---@field Run fun(injectedEnv:table, verbose:boolean?, doStackTrace:boolean?, redirectObj:boolean?) Run the test.
+
 local test = {
+  ---@enum test_status
   STATUS = {
     LOADED = 1,
     RUNNING = 2,
@@ -11,18 +25,21 @@ local test = {
     LOADING = 6
   }
 }
-local testmt = {__index = {}}
+local testmt = { __index = {} }
 function testmt.__index:Fail(reason)
   self.status = test.STATUS.FAIL
   table.insert(self.reason, reason)
 end
+
 function testmt.__index:Error(reason)
   self.status = test.STATUS.ERROR
   table.insert(self.error, reason)
 end
+
 function testmt.__index:Ok()
   self.status = test.STATUS.OK
 end
+
 function testmt.__index:Stop()
   self.running = false
 end
@@ -40,7 +57,7 @@ local function generateTestWrapper(test, toInject)
       if not testOk then
         local traceback = debug.traceback()
         local func, file = traceback:match("in function '(.-)'") or "UNKNOWN",
-                    traceback:match(".-\n.-\n%s(%S-%:%d+%:)") or "Unknown file:"
+            traceback:match(".-\n.-\n%s(%S-%:%d+%:)") or "Unknown file:"
         local formatter = "%s%s: %s"
         test:Fail(formatter:format(file, func, reason))
       end
@@ -105,7 +122,13 @@ function testmt.__index:Run(injectedEnv, verbose, doStackTrace, redirectObj)
   return self
 end
 
+--- Create a new test object.
+---@param f function The function to create a test from.
+---@param name string The name of the test.
+---@param suite string The name of the suite this test is a part of.
+---@return test test The test created.
 function test.new(f, name, suite)
+  ---@type test
   local obj = {
     name = name,
     suite = suite,
