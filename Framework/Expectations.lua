@@ -72,24 +72,40 @@ function M.EVENT(f, timeout, event, ...)
   ok, e = expect(3, timeout, "number", "nil")
   if not ok then return false, e end
 
-  ok, e = pcall(f)
-  if not ok then error(e, 0) end
+  local running = true
+  local function run()
+    ok, e = pcall(f)
+    if not ok then error(e, 0) end
 
-  local tmr = os.startTimer(timeout or 0.25)
-  while true do
-    local ev = table.pack(os.pullEventRaw())
-    if ev[1] == "timer" and ev[2] == tmr then
-      return false, string.format("Timed out before receiving event '%s'.", event)
-    elseif ev[1] == event then
-      for i = 1, event_args.n do
-        local is_equal, err = M.EQ(event_args[i], ev[i])
-        if not is_equal then
-          return false, string.format("Event received, but argument %d is unexpected: %s", i, err)
+    sleep()
+    running = false
+  end
+
+  local listen_ok, listen_err = false, ""
+  local function listener()
+    local tmr = os.startTimer(timeout or 0.25)
+    while running do
+      local ev = table.pack(os.pullEventRaw())
+      if ev[1] == "timer" and ev[2] == tmr then
+        listen_ok, listen_err = false, string.format("Timed out before receiving event '%s'.", event)
+        return
+      elseif ev[1] == event then
+        for i = 1, event_args.n do
+          local is_equal, err = M.EQ(event_args[i], ev[i])
+          if not is_equal then
+            listen_ok, listen_err = false, string.format("Event received, but argument %d is unexpected: %s", i, err)
+            return
+          end
         end
+        listen_ok, listen_err = true, ""
+        return
       end
-      return true, ""
     end
   end
+
+  parallel.waitForAll(run, listener)
+
+  return listen_ok, listen_err
 end
 
 --- Compare two values for equality.
