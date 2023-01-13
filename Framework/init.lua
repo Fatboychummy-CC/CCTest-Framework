@@ -1,4 +1,3 @@
-
 -- Calculate the path to self for module requiring.
 local modulesPath = ...
 
@@ -16,7 +15,7 @@ for i = #modulesPath, 1, -1 do
   end
 end
 
-
+---@class suite
 
 local module = {
   loaded = {},
@@ -27,7 +26,8 @@ local module = {
 local function badModule(module, versionMinimum)
   local dir = fs.getDir(shell.getRunningProgram())
   term.setTextColor(colors.orange)
-  print(string.format("Module '%s' does not exist on pre-%s minecraft versions. This test framework will not work on your version of minecraft without doing the following:", module, versionMinimum))
+  print(string.format("Module '%s' does not exist on pre-%s minecraft versions. This test framework will not work on your version of minecraft without doing the following:"
+    , module, versionMinimum))
   print()
   print("1.", "Go to https://github.com/Squiddev-CC/CC-Tweaked")
   print("2.", string.format("Click 'Go To File', and search for '%s.lua'.", module:gsub("%.", "/")))
@@ -53,12 +53,11 @@ local dummyTerminate = "DUMMY"
 local verbose = false
 local hasVPrinted = false
 
-_G.DISABLED = {} -- global for disabled test
+_G.DISABLED = {} --- global for disabled tests
 
-function _G.DUMMY_TERMINATE() -- global for terminating but not killing the program.
+function _G.DUMMY_TERMINATE() --- Terminate but do not kill the test program.
   return "terminate", dummyTerminate
 end
-
 
 function _G.verbosePrint(...)
   if verbose then
@@ -70,12 +69,17 @@ function _G.verbosePrint(...)
   end
 end
 
--- This functions builds the info line for the current test, ie:
--- [ RUN ] testName
--- [ FAIL] testName
--- [ERROR] testName
--- ... so on
--- generates blit line bg and fg colors as well
+--- This functions builds the info line for the current test, ie:
+--- [ RUN ] testName
+--- [ FAIL] testName
+--- [ERROR] testName
+--- ... so on
+--- generates blit line bg and fg colors as well
+---@param name string The name of the info line.
+---@param status number The status of the test.
+---@return string text The status text.
+---@return string foreground The blit foreground.
+---@return string background The blit background.
 local function buildInfoLine(name, status)
   expect(1, name, "string")
   expect(2, status, "number")
@@ -115,11 +119,12 @@ local function buildInfoLine(name, status)
   end
 
   return string.format(formatInfo, statusString, name),
-         string.format(formatFG, statusFG, string.rep('a', #name)),
-         string.format(formatBG, statusBG, string.rep('f', #name))
+      string.format(formatFG, statusFG, string.rep('a', #name)),
+      string.format(formatBG, statusBG, string.rep('f', #name))
 end
 
--- write the info about a test.
+--- write the info about a test.
+---@param t test The test to write information for.
 local function writeInfo(t)
   local xSize = term.getSize()
   local x, y = term.getCursorPos()
@@ -130,7 +135,8 @@ local function writeInfo(t)
   term.blit(buildInfoLine(t.name, t.status))
 end
 
--- if the test failed or errored, print the reason, otherwise just draw a newline
+--- if the test failed or errored, print the reason, otherwise just draw a newline
+---@param t test The test to print error reason for.
 local function finishTest(t)
   print()
   if t.status == Test.STATUS.FAIL then
@@ -146,6 +152,10 @@ local function finishTest(t)
   end
 end
 
+--- Create a test wrapper for a given function.
+---@param f function
+---@param isAsserted boolean If the test function was asserted.
+---@return fun(...:any):boolean, boolean, string test_wrapper The test wrapper which returns the test results.
 local function generateWrapper(f, isAsserted)
   return function(...)
     local ok, ret = f(...)
@@ -160,20 +170,26 @@ for k, v in pairs(Expectations) do
   toInject["EXPECT_" .. k] = generateWrapper(v, false)
   toInject["ASSERT_" .. k] = generateWrapper(v, true)
 end
+
+---@type fun():satisfied:true, error:string Pass the test.
 toInject.PASS = generateWrapper(function() return true, "" end, false)
+---@type fun(reason:string?):satisfied:true, error:string Fail the test, with an optional reason.
 toInject.FAIL = generateWrapper(function(reason) return false, reason or "Forceful failure." end, true)
 
+--- Count the number of tests that are loaded.
+---@return integer tests The total number of tests.
+---@return {suites:table<string,test>} fails The tests that failed, and which suites they are from.
 local function countTests()
   local total = 0
   local fails = {
-    suites = {n = 0}
+    suites = { n = 0 }
   }
   for i = 1, #module.tests do
-    for i, test in ipairs(module.tests[i]) do
+    for j, test in ipairs(module.tests[i]) do
       if test.status == Test.STATUS.FAIL or test.status == Test.STATUS.ERROR then
         total = total + 1
         if not fails.suites[test.suite] then
-          fails.suites[test.suite] = {n = 0}
+          fails.suites[test.suite] = { n = 0 }
           fails.suites.n = fails.suites.n + 1
         end
         fails.suites[test.suite].n = fails.suites[test.suite].n + 1
@@ -207,7 +223,7 @@ local function parseArgs(...)
   for i = 1, args.n do
     local arg = args[i]
     if arg:match("^%-%a") then -- flag, add to flags list
-      for i = 2, #arg do
+      for j = 2, #arg do
         data.flags[arg:sub(i, i):lower()] = true
       end
     elseif arg:match("^%-%-.+") then -- big-flag
@@ -225,6 +241,7 @@ local function setVerbose(v)
   verbose = v
 end
 
+--- Print the disabled tests.
 local function printDisabled()
   if module.disabled > 0 then
     print()
@@ -233,10 +250,12 @@ local function printDisabled()
   end
 end
 
+--- Run all of the tests that have been loaded.
+---@param ... string The arguments to run the tests with.
 function module.runAllTests(...)
-  local args = parseArgs(...)
+  local args         = parseArgs(...)
   local doStackTrace = args.flags.s or args.flags["stack-trace"]
-  verbose      = args.flags.v or args.flags.verbose
+  verbose            = args.flags.v or args.flags.verbose
 
   local startingTerm = term.current()
 
@@ -264,26 +283,31 @@ function module.runAllTests(...)
   local mx, my = term.getSize()
   local c = term.getTextColor()
   term.setTextColor(colors.orange)
-  print(string.format("%d test%s failed from %d suite%s.", total, total > 1 and "s" or "", inSuites.suites.n, inSuites.suites.n > 1 and "s" or ""))
+  print(string.format("%d test%s failed from %d suite%s.", total, total > 1 and "s" or "", inSuites.suites.n,
+    inSuites.suites.n > 1 and "s" or ""))
   term.setTextColor(c)
   for suiteName, tests in pairs(inSuites.suites) do
     if type(tests) == "table" then
       for i = 1, #tests do
         local txt, fg, bg = "Test %s from %s failed.",
-                            "00000%s000000%s00000000",
-                            "fffffffffffffffffff%s"
+            "00000%s000000%s00000000",
+            "fffffffffffffffffff%s"
         local testName = tests[i].name
         txt = txt:format(testName, suiteName)
         fg = fg:format(string.rep('a', #testName), string.rep('b', #suiteName))
         bg = bg:format(string.rep('f', #testName + #suiteName))
         txt = strings.wrap(txt, mx - 2)
-        fg = splitOn(fg, txt)
+
+        ---@diagnostic disable-next-line
+        fg = splitOn(fg, txt) ---@cast fg table
+
+        ---@diagnostic disable-next-line
         bg = splitOn(bg, txt)
 
-        for i = 1, #txt do
+        for j = 1, #txt do
           local x, y = term.getCursorPos()
           term.setCursorPos(3, y)
-          term.blit(txt[i], fg[i], bg[i])
+          term.blit(txt[j], fg[j], bg[j])
           print()
         end
       end
@@ -293,12 +317,17 @@ function module.runAllTests(...)
   printDisabled()
 end
 
+--- Run a single suite of tests.
+---@param s suite The test suite.
+---@param verbose boolean? Whether or not to print verbose text.
+---@param doStackTrace boolean? Whether or not to display a stacktrace on errors.
 function module.runSuite(s, verbose, doStackTrace)
   local fg, bg, txt = "0000000%s",
-                      "fffffff%s",
-                      "Suite: %s"
+      "fffffff%s",
+      "Suite: %s"
   term.blit(txt:format(s.name), fg:format(string.rep('b', #s.name)), bg:format(string.rep('f', #s.name)))
-  print()print()
+  print()
+  print()
   for i = 1, #s do
     local currentTest = s[i]
     local terminated = false
@@ -355,13 +384,17 @@ function module.runSuite(s, verbose, doStackTrace)
   print()
 end
 
+--- Create a new suite.
+---@param suiteName string The name of the suite
 function module.newSuite(suiteName)
-  local suite = {finished = false, name = suiteName}
+  local suite = { finished = false, name = suiteName }
   module.tests[#module.tests + 1] = suite
 
   local currentName, loadBody
 
-  -- Load the name into memory
+  --- Load the name into memory
+  ---@param name string The name of the test to be loaded.
+  ---@return fun(f:{[1]:function}|function)
   local function loadName(name)
     expect(1, name, "string")
     suite.finished = false
@@ -371,7 +404,9 @@ function module.newSuite(suiteName)
     return loadBody
   end
 
-  -- Load the body, then create the test and add it to the suite.
+  --- Load the body, then create the test and add it to the suite.
+  ---@param f {[1]:function}|function The function to test.
+  ---@return fun(name:string)
   loadBody = function(f)
     if type(f) == "table" then
       if f == DISABLED then
