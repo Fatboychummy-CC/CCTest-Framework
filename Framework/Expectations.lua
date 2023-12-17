@@ -62,6 +62,35 @@ function M.EVENT(f, event, timeout, ...)
   end
 end
 
+function M.TIMEOUT(f, timeout, ...)
+  local ok, e = expect(1, f, "function")
+    if not ok then return false, e end
+  ok, e = expect(2, timeout, "number", "nil")
+    if not ok then return false, e end
+  
+  local args = table.pack(...)
+
+  local tmr = os.startTimer(timeout or 0.25)
+  parallel.waitForAny(
+    function()
+      while true do
+        local ev = table.pack(os.pullEventRaw())
+        if ev[1] == "timer" and ev[2] == tmr then
+          return false, "Timed out."
+        end
+      end
+    end,
+    function()
+      local ok, e = pcall(f, table.unpack(args, 1, args.n))
+      if not ok then
+        return false, e
+      end
+    end
+  )
+
+  return true, ""
+end
+
 function M.EQ(a, b)
   return a == b, string.format("Values %s and %s are unequal.", tostring(a), tostring(b))
 end
