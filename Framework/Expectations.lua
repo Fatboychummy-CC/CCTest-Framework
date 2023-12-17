@@ -71,24 +71,25 @@ function M.TIMEOUT(f, timeout, ...)
   local args = table.pack(...)
 
   local tmr = os.startTimer(timeout or 0.25)
+  local test_ok, test_e = true, ""
   parallel.waitForAny(
     function()
       while true do
         local ev = table.pack(os.pullEventRaw())
         if ev[1] == "timer" and ev[2] == tmr then
-          return false, "Timed out."
+          test_ok, test_e = false, "Timed out."
         end
       end
     end,
     function()
       local ok, e = pcall(f, table.unpack(args, 1, args.n))
       if not ok then
-        return false, e
+        test_ok, test_e = false, e
       end
     end
   )
 
-  return true, ""
+  return test_ok, test_e
 end
 
 function M.EQ(a, b)
