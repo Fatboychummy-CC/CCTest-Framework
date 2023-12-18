@@ -13,6 +13,7 @@ local logger = {
   y = 0,
 }
 
+local SUITE_NAME_COLOR = 'b' -- Blue
 local TEST_NAME_COLOR = 'a' -- Purple
 local EXPECT_COLOR = '4' -- Yellow
 local ASSERT_COLOR = '1' -- Orange
@@ -113,6 +114,28 @@ local function bmsg(message, text_color, bg_color)
   return message, text_color, bg_color
 end
 
+--- Display information about the new suite.
+--- @param name string The name of the suite.
+--- @param test_count number The number of tests in the suite.
+function logger.new_suite(name, test_count)
+  expect(1, name, "string")
+  expect(2, test_count, "number")
+
+  print()
+
+  term.blit(
+    combine_blit(
+      {bmsg("Running suite ", WHITE, DEFAULT_BG_COLOR)},
+      {bmsg(name, SUITE_NAME_COLOR, DEFAULT_BG_COLOR)},
+      {bmsg(" with ", WHITE, DEFAULT_BG_COLOR)},
+      {bmsg(tostring(test_count), SUITE_NAME_COLOR, DEFAULT_BG_COLOR)},
+      {bmsg(" tests.", WHITE, DEFAULT_BG_COLOR)}
+    )
+  )
+
+  print()
+end
+
 --- Shift logger focus to a new test.
 ---@param name string The name of the test.
 function logger.new_test(name)
@@ -175,7 +198,11 @@ end
 function logger.log_expectation(expectation, passed, message)
   expect(1, expectation, "string")
   expect(2, passed, "boolean")
-  expect(3, message, "string")
+  expect(3, message, "string", "nil")
+
+  if not passed then
+    logger.current_status = "fail"
+  end
 
   local text, text_color, bg_color = format_status(logger.current_status)
 
@@ -198,6 +225,12 @@ function logger.log_expectation(expectation, passed, message)
       {bmsg(message or "Passed.", passed and PASSED_COLOR or FAILED_COLOR, DEFAULT_BG_COLOR)}
     )
   )
+
+  if not passed and not logger.verbose then
+    -- If the expectation failed, print a new line to ensure it doesn't get overwritten.
+    print()
+    local _; _, logger.y = term.getCursorPos()
+  end
 end
 
 --- Log an assertion.
@@ -207,7 +240,11 @@ end
 function logger.log_assertion(assertion, passed, message)
   expect(1, assertion, "string")
   expect(2, passed, "boolean")
-  expect(3, message, "string")
+  expect(3, message, "string", "nil")
+
+  if not passed then
+    logger.current_status = "fail"
+  end
 
   local text, text_color, bg_color = format_status(logger.current_status)
 
@@ -230,6 +267,12 @@ function logger.log_assertion(assertion, passed, message)
       {bmsg(message or "Passed.", passed and PASSED_COLOR or FAILED_COLOR, DEFAULT_BG_COLOR)}
     )
   )
+
+  if not passed and not logger.verbose then
+    -- If the assertion failed, print a new line to ensure it doesn't get overwritten.
+    print()
+    local _; _, logger.y = term.getCursorPos()
+  end
 end
 
 --- Log an error.
@@ -274,6 +317,97 @@ function logger.log_failure(failure)
 
   -- And print a new line to ensure it doesn't get overwritten
   print()
+end
+
+function logger.log_stacktrace(stacktrace)
+  expect(1, stacktrace, "string")
+
+  -- Always print stacktraces on new lines.
+  print()
+
+  term.blit(
+    combine_blit(
+      {bmsg(logger.current_test_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR)},
+      {bmsg(" | ", WHITE, DEFAULT_BG_COLOR)},
+      {bmsg("STACKTRACE", ERROR_COLOR, DEFAULT_BG_COLOR)},
+      {bmsg(":", WHITE, DEFAULT_BG_COLOR)}
+    )
+  )
+
+  print()
+  printError(stacktrace)
+
+  -- and always print a new line to ensure it doesn't get overwritten
+  print()
+  local _; _, logger.y = term.getCursorPos()
+
+  -- And print a new line to ensure it doesn't get overwritten
+  print()
+end
+
+
+--- Log the results of the given suites
+---@param suites test_suite[] The suites to log.
+function logger.log_results(suites)
+  -- First count the number of tests and failures for each suite.
+  ---@type table<test_suite, {tests: number, failures: number, fail_names: array_of<string>}>
+  local data = {}
+  local suite_count = 0
+
+  for _, suite in ipairs(suites) do
+    suite_count = suite_count + 1
+    data[suite] = {
+      tests = 0,
+      failures = 0,
+      fail_names = {},
+    }
+
+    for _, test in ipairs(suite.tests) do
+      data[suite].tests = data[suite].tests + 1
+      if test.status == "fail" or test.status == "error" then
+        data[suite].failures = data[suite].failures + 1
+        table.insert(data[suite].fail_names, test.name)
+      end
+    end
+  end
+
+  -- Then print the results.
+  print()
+
+  -- Start with the count of suites
+  term.blit(
+    combine_blit(
+      {bmsg("Ran ", WHITE, DEFAULT_BG_COLOR)},
+      {bmsg(tostring(suite_count), SUITE_NAME_COLOR, DEFAULT_BG_COLOR)},
+      {bmsg(" suite(s).", WHITE, DEFAULT_BG_COLOR)}
+    )
+  )
+
+  -- Then print the results for each suite THAT HAD FAILURES.
+  for suite, suite_data in pairs(data) do
+    if suite_data.failures > 0 then
+      print()
+      term.blit(
+        combine_blit(
+          {bmsg("Suite ", WHITE, DEFAULT_BG_COLOR)},
+          {bmsg(suite.name, SUITE_NAME_COLOR, DEFAULT_BG_COLOR)},
+          {bmsg(" had ", WHITE, DEFAULT_BG_COLOR)},
+          {bmsg(tostring(suite_data.failures), FAILED_COLOR, DEFAULT_BG_COLOR)},
+          {bmsg(" failure(s):", WHITE, DEFAULT_BG_COLOR)}
+        )
+      )
+
+      for _, fail_name in ipairs(suite_data.fail_names) do
+        print()
+        term.blit(
+          combine_blit(
+            {bmsg("  ", WHITE, DEFAULT_BG_COLOR)},
+            {bmsg(fail_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR)}
+          )
+        )
+      end
+    end
+  end
 end
 
 return logger
