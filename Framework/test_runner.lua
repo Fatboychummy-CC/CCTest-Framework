@@ -24,7 +24,7 @@ local function run_test(test, logger)
     local coro = test.coro
     local ok, event_filter, test_assertion, message
     local resume_immediate = false
-    
+
     test.status = "running"
     while true do
       local event
@@ -32,7 +32,7 @@ local function run_test(test, logger)
       -- If we need to resume immediately (i.e: after a pass or expectation
       -- failure), do so.
       if resume_immediate then
-        event = {n=0}
+        event = { n = 0 }
         resume_immediate = false
       else
         event = table.pack(os.pullEventRaw())

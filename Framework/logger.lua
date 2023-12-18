@@ -1,6 +1,6 @@
 --- A logging library purpose-built for the test framework.
 
-local expect = require "cc.expect".expect  --[[@as fun(a: number, b: any, ...: string)]]
+local expect = require "cc.expect".expect --[[@as fun(a: number, b: any, ...: string)]]
 
 ---@class logger
 ---@field current_test_name string? The name of the current test.
@@ -14,14 +14,14 @@ local logger = {
 }
 
 local SUITE_NAME_COLOR = 'b' -- Blue
-local TEST_NAME_COLOR = 'a' -- Purple
-local EXPECT_COLOR = '4' -- Yellow
-local ASSERT_COLOR = '1' -- Orange
-local ERROR_COLOR = 'e' -- Red
+local TEST_NAME_COLOR = 'a'  -- Purple
+local EXPECT_COLOR = '4'     -- Yellow
+local ASSERT_COLOR = '1'     -- Orange
+local ERROR_COLOR = 'e'      -- Red
 local DEFAULT_BG_COLOR = 'f' -- Black
-local WHITE = '0' -- White
-local PASSED_COLOR = '5' -- Lime
-local FAILED_COLOR = 'e' -- Orange
+local WHITE = '0'            -- White
+local PASSED_COLOR = '5'     -- Lime
+local FAILED_COLOR = 'e'     -- Orange
 
 
 --- Format the status into a valid blit string.
@@ -125,11 +125,11 @@ function logger.new_suite(name, test_count)
 
   term.blit(
     combine_blit(
-      {bmsg("Running suite ", WHITE, DEFAULT_BG_COLOR)},
-      {bmsg(name, SUITE_NAME_COLOR, DEFAULT_BG_COLOR)},
-      {bmsg(" with ", WHITE, DEFAULT_BG_COLOR)},
-      {bmsg(tostring(test_count), SUITE_NAME_COLOR, DEFAULT_BG_COLOR)},
-      {bmsg(" tests.", WHITE, DEFAULT_BG_COLOR)}
+      { bmsg("Running suite ", WHITE, DEFAULT_BG_COLOR) },
+      { bmsg(name, SUITE_NAME_COLOR, DEFAULT_BG_COLOR) },
+      { bmsg(" with ", WHITE, DEFAULT_BG_COLOR) },
+      { bmsg(tostring(test_count), SUITE_NAME_COLOR, DEFAULT_BG_COLOR) },
+      { bmsg(" tests.", WHITE, DEFAULT_BG_COLOR) }
     )
   )
 
@@ -218,11 +218,11 @@ function logger.log_expectation(expectation, passed, message)
   term.blit(
     combine_blit(
       text, text_color, bg_color,
-      {bmsg(logger.current_test_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR)},
-      {bmsg(" | ", WHITE, DEFAULT_BG_COLOR)},
-      {bmsg(expectation, EXPECT_COLOR, DEFAULT_BG_COLOR)},
-      {bmsg(" : ", WHITE, DEFAULT_BG_COLOR)},
-      {bmsg(message or "Passed.", passed and PASSED_COLOR or FAILED_COLOR, DEFAULT_BG_COLOR)}
+      { bmsg(logger.current_test_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR) },
+      { bmsg(" | ", WHITE, DEFAULT_BG_COLOR) },
+      { bmsg(expectation, EXPECT_COLOR, DEFAULT_BG_COLOR) },
+      { bmsg(" : ", WHITE, DEFAULT_BG_COLOR) },
+      { bmsg(message or "Passed.", passed and PASSED_COLOR or FAILED_COLOR, DEFAULT_BG_COLOR) }
     )
   )
 
@@ -260,11 +260,11 @@ function logger.log_assertion(assertion, passed, message)
   term.blit(
     combine_blit(
       text, text_color, bg_color,
-      {bmsg(logger.current_test_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR)},
-      {bmsg(" | ", WHITE, DEFAULT_BG_COLOR)},
-      {bmsg(assertion, ASSERT_COLOR, DEFAULT_BG_COLOR)},
-      {bmsg(" : ", WHITE, DEFAULT_BG_COLOR)},
-      {bmsg(message or "Passed.", passed and PASSED_COLOR or FAILED_COLOR, DEFAULT_BG_COLOR)}
+      { bmsg(logger.current_test_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR) },
+      { bmsg(" | ", WHITE, DEFAULT_BG_COLOR) },
+      { bmsg(assertion, ASSERT_COLOR, DEFAULT_BG_COLOR) },
+      { bmsg(" : ", WHITE, DEFAULT_BG_COLOR) },
+      { bmsg(message or "Passed.", passed and PASSED_COLOR or FAILED_COLOR, DEFAULT_BG_COLOR) }
     )
   )
 
@@ -285,11 +285,11 @@ function logger.log_error(error)
 
   term.blit(
     combine_blit(
-      {bmsg(logger.current_test_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR)},
-      {bmsg(" | ", WHITE, DEFAULT_BG_COLOR)},
-      {bmsg("ERROR", ERROR_COLOR, DEFAULT_BG_COLOR)},
-      {bmsg(" : ", WHITE, DEFAULT_BG_COLOR)},
-      {bmsg(error, ERROR_COLOR, DEFAULT_BG_COLOR)}
+      { bmsg(logger.current_test_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR) },
+      { bmsg(" | ", WHITE, DEFAULT_BG_COLOR) },
+      { bmsg("ERROR", ERROR_COLOR, DEFAULT_BG_COLOR) },
+      { bmsg(" : ", WHITE, DEFAULT_BG_COLOR) },
+      { bmsg(error, ERROR_COLOR, DEFAULT_BG_COLOR) }
     )
   )
 
@@ -307,11 +307,11 @@ function logger.log_failure(failure)
 
   term.blit(
     combine_blit(
-      {bmsg(logger.current_test_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR)},
-      {bmsg(" | ", WHITE, DEFAULT_BG_COLOR)},
-      {bmsg("FAIL", FAILED_COLOR, DEFAULT_BG_COLOR)},
-      {bmsg(" : ", WHITE, DEFAULT_BG_COLOR)},
-      {bmsg(failure, FAILED_COLOR, DEFAULT_BG_COLOR)}
+      { bmsg(logger.current_test_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR) },
+      { bmsg(" | ", WHITE, DEFAULT_BG_COLOR) },
+      { bmsg("FAIL", FAILED_COLOR, DEFAULT_BG_COLOR) },
+      { bmsg(" : ", WHITE, DEFAULT_BG_COLOR) },
+      { bmsg(failure, FAILED_COLOR, DEFAULT_BG_COLOR) }
     )
   )
 
@@ -327,10 +327,10 @@ function logger.log_stacktrace(stacktrace)
 
   term.blit(
     combine_blit(
-      {bmsg(logger.current_test_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR)},
-      {bmsg(" | ", WHITE, DEFAULT_BG_COLOR)},
-      {bmsg("STACKTRACE", ERROR_COLOR, DEFAULT_BG_COLOR)},
-      {bmsg(":", WHITE, DEFAULT_BG_COLOR)}
+      { bmsg(logger.current_test_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR) },
+      { bmsg(" | ", WHITE, DEFAULT_BG_COLOR) },
+      { bmsg("STACKTRACE", ERROR_COLOR, DEFAULT_BG_COLOR) },
+      { bmsg(":", WHITE, DEFAULT_BG_COLOR) }
     )
   )
 
@@ -344,7 +344,6 @@ function logger.log_stacktrace(stacktrace)
   -- And print a new line to ensure it doesn't get overwritten
   print()
 end
-
 
 --- Log the results of the given suites
 ---@param suites test_suite[] The suites to log.
@@ -377,9 +376,9 @@ function logger.log_results(suites)
   -- Start with the count of suites
   term.blit(
     combine_blit(
-      {bmsg("Ran ", WHITE, DEFAULT_BG_COLOR)},
-      {bmsg(tostring(suite_count), SUITE_NAME_COLOR, DEFAULT_BG_COLOR)},
-      {bmsg(" suite(s).", WHITE, DEFAULT_BG_COLOR)}
+      { bmsg("Ran ", WHITE, DEFAULT_BG_COLOR) },
+      { bmsg(tostring(suite_count), SUITE_NAME_COLOR, DEFAULT_BG_COLOR) },
+      { bmsg(" suite(s).", WHITE, DEFAULT_BG_COLOR) }
     )
   )
 
@@ -389,11 +388,11 @@ function logger.log_results(suites)
       print()
       term.blit(
         combine_blit(
-          {bmsg("Suite ", WHITE, DEFAULT_BG_COLOR)},
-          {bmsg(suite.name, SUITE_NAME_COLOR, DEFAULT_BG_COLOR)},
-          {bmsg(" had ", WHITE, DEFAULT_BG_COLOR)},
-          {bmsg(tostring(suite_data.failures), FAILED_COLOR, DEFAULT_BG_COLOR)},
-          {bmsg(" failure(s):", WHITE, DEFAULT_BG_COLOR)}
+          { bmsg("Suite ", WHITE, DEFAULT_BG_COLOR) },
+          { bmsg(suite.name, SUITE_NAME_COLOR, DEFAULT_BG_COLOR) },
+          { bmsg(" had ", WHITE, DEFAULT_BG_COLOR) },
+          { bmsg(tostring(suite_data.failures), FAILED_COLOR, DEFAULT_BG_COLOR) },
+          { bmsg(" failure(s):", WHITE, DEFAULT_BG_COLOR) }
         )
       )
 
@@ -401,8 +400,8 @@ function logger.log_results(suites)
         print()
         term.blit(
           combine_blit(
-            {bmsg("  ", WHITE, DEFAULT_BG_COLOR)},
-            {bmsg(fail_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR)}
+            { bmsg("  ", WHITE, DEFAULT_BG_COLOR) },
+            { bmsg(fail_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR) }
           )
         )
       end
