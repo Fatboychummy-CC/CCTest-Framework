@@ -42,6 +42,7 @@ local function run_test(test, logger)
         event = table.pack(os.pullEventRaw())
       end
 
+      -- Only handle terminate events, or events that match the last event filter (or cctest events)
       if event[1] == "terminate" or event[1] == last_event_filter or last_event_filter == nil then
         -- Resume the test's coroutine.
         ok, event_filter, test_assertion, message = coroutine.resume(coro, table.unpack(event, 1, event.n))
