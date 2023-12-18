@@ -399,3 +399,160 @@ suite.suite "My Suite"
   end)
 ```
 
+#### `PASS`
+
+Forcefully passes the test, even if it was marked as failed.
+
+```lua
+PASS()
+```
+
+```lua
+suite.suite "My Suite"
+  "Test name" (function()
+    EXPECT_EQ(1, 2) -- fail
+    PASS() -- the test is now marked as passed, even though an expectation failed.
+  end)
+```
+
+#### `FAIL`
+
+Forcefully fails the test.
+
+```lua
+FAIL()
+```
+
+```lua
+suite.suite "My Suite"
+  "Test name" (function()
+    FAIL() -- fail
+  end)
+```
+
+### Test modifiers
+
+Multiple modifiers can be applied to a test. For example, you can apply both
+`REPEAT` and `TIMEOUT` to a test like so:
+  
+```lua
+suite.suite "My Suite"
+  "Test name" (suite.MODS.REPEAT(10), suite.MODS.TIMEOUT(3), function()
+    -- ...
+  end)
+```
+
+and the test will be ran 10 times, and will fail if any single test takes longer
+than 3 seconds to run.
+
+#### `ONLY`
+
+If a test is marked with `ONLY`, only that test will be run. All other tests
+will be ignored (unless they have `ONLY` as well).
+
+```lua
+suite.suite "My Suite"
+  "Test name" (function()
+    -- ...
+  end)
+  "Test name 2" (suite.MODS.ONLY, function()
+    -- ...
+  end)
+```
+
+#### `DISABLE`
+
+If a test is marked with `DISABLE`, that test will be ignored.
+
+```lua
+suite.suite "My Suite"
+  "Test name" (function()
+    -- ...
+  end)
+  "Test name 2" (suite.MODS.DISABLE, function()
+    -- ...
+  end)
+```
+
+#### `SKIP`
+
+If a test is marked with `SKIP`, that test will be skipped. The test will be
+marked as passed, but will not be run.
+
+```lua
+suite.suite "My Suite"
+  "Test name" (function()
+    -- ...
+  end)
+  "Test name 2" (suite.MODS.SKIP, function()
+    -- ...
+  end)
+```
+
+#### `TIMEOUT`
+
+If a test is marked with `TIMEOUT`, the test will fail if it takes longer than
+the given amount of time to run.
+
+```lua
+suite.MODS.TIMEOUT(timeout: number)
+```
+
+```lua
+suite.suite "My Suite"
+  "Test name" (suite.MODS.TIMEOUT(1), function()
+    -- ...
+  end)
+```
+
+#### `REPEAT`
+
+If a test is marked with `REPEAT`, the test will be run multiple times.
+
+```lua
+suite.MODS.REPEAT(times: number)
+```
+
+```lua
+suite.suite "My Suite"
+  "Test name" (suite.MODS.REPEAT(10), function()
+    -- ...
+  end)
+```
+
+#### `REPEAT_TIMEOUT`
+
+Similar to `(suite.REPEAT(x), suite.TIMEOUT(y))`, but will fail if the entire
+batch of tests takes longer than the given amount of time to run.
+
+```lua
+suite.MODS.REPEAT_TIMEOUT(times: number, timeout: number)
+```
+
+```lua
+suite.suite "My Suite"
+  "Test name" (suite.MODS.REPEAT_TIMEOUT(10, 3), function()
+    -- ...
+  end)
+```
+
+#### `REPEAT_UNTIL_FAIL`
+
+If a test is marked with `REPEAT_UNTIL_FAIL`, the test will be run multiple
+times until it fails. Not wholely useful, but if you have a bug that only seems
+to happen sometimes, this can be useful to see if you can get it to trigger.
+
+It does, however, also include a timeout. If the test takes longer than the
+given amount of time to run, it will be marked as passed (assuming no other
+failures occurred).
+
+```lua
+suite.MODS.REPEAT_UNTIL_FAIL(timeout: number)
+```
+
+```lua
+suite.suite "My Suite"
+  "Test name" (suite.MODS.REPEAT_UNTIL_FAIL(10), function()
+    -- ...
+  end)
+```
