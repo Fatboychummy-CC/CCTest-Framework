@@ -342,7 +342,7 @@ suite.suite "My Suite"
   end)
 ```
 
-#### `FLOAT_EQ`
+#### `ASSERT_FLOAT_EQ`
 
 Asserts that two floating point numbers are equal within a given tolerance. The
 default tolerance is 0.00001.
