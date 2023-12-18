@@ -476,25 +476,7 @@ If a test is marked with `DISABLE`, that test will be ignored.
 
 ```lua
 suite.suite "My Suite"
-  "Test name" (function()
-    -- ...
-  end)
-  "Test name 2" (suite.MODS.DISABLE, function()
-    -- ...
-  end)
-```
-
-#### `SKIP`
-
-If a test is marked with `SKIP`, that test will be skipped. The test will be
-marked as passed, but will not be run.
-
-```lua
-suite.suite "My Suite"
-  "Test name" (function()
-    -- ...
-  end)
-  "Test name 2" (suite.MODS.SKIP, function()
+  "Test name" (suite.MODS.DISABLE, function()
     -- ...
   end)
 ```
