@@ -73,7 +73,13 @@ suite.run_all() -- Run all loaded suites
 
 ### Assertions
 
-The framework provides a few assertions that can be used in tests.
+The framework provides a few assertions that can be used in tests. Each of these
+assertions will *instantly* stop the test if they fail.
+
+All assertions can be used as expectations instead, by swapping the `ASSERT_`
+prefix with `EXPECT_`. Expectations will not stop the test if they fail, but
+will instead mark the test as failed. The test will continue to run, and will
+fail if it reaches the end of the test without `PASS()`ing.
 
 #### `ASSERT_EQ`
 
@@ -398,6 +404,8 @@ suite.suite "My Suite"
     ASSERT_DEEP_EQ({a = 1, b = 2}, {a = 1}) -- fail
   end)
 ```
+
+### Other functions
 
 #### `PASS`
 
