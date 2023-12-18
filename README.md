@@ -171,6 +171,8 @@ suite.suite "My Suite"
 Asserts that a value is falsy. This is equivalent to
 `ASSERT_FALSE(value ~= nil and value ~= false)`.
 
+Note that `ASSERT_FALSEY` also exists, and is an alias for `ASSERT_FALSY`.
+
 ```lua
 ASSERT_FALSY(value: any)
 ```
@@ -357,14 +359,14 @@ Use this instead of `ASSERT_EQ` for floating point numbers. `0.1 + 0.2` is not
 *exactly* equal to `0.3` in Lua, so `ASSERT_EQ(0.1 + 0.2, 0.3)` will fail.
 
 ```lua
-FLOAT_EQ(value_a: any, value_b: any, tolerance: number = 0.00001)
+ASSERT_FLOAT_EQ(value_a: any, value_b: any, tolerance: number = 0.00001)
 ```
 
 ```lua
 suite.suite "My Suite"
   "Test name" (function()
-    FLOAT_EQ(1.00001, 1.00002) -- pass
-    FLOAT_EQ(1.00001, 1.00002, 0.000001) -- fail
+    ASSERT_FLOAT_EQ(1.00001, 1.00002) -- pass
+    ASSERT_FLOAT_EQ(1.00001, 1.00002, 0.000001) -- fail
   end)
 ```
 
