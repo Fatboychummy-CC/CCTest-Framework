@@ -250,18 +250,22 @@ suite.suite "My Suite"
 
 #### `ASSERT_EVENT`
 
-Asserts that an event is emitted within a given timeframe while running a given
-function.
+Asserts that an event is emitted some time during this test. Variadic arguments
+are used for further comparison of the event (if included).
+
+This assertion will create a post-process task that will wait for the event to
+be emitted, so it is recommended to be used with the `EXTEND` modifier.
 
 ```lua
-EVENT(func: fun(...: any), event: string, timeout: number, ...: any)
+ASSERT_EVENT(event: string, ...: any)
 ```
 
 ```lua
 suite.suite "My Suite"
-  "Test name" (function()
-    ASSERT_EVENT(function() os.queueEvent("test") end, "test", 1) -- pass
-    ASSERT_EVENT(function() end, "test", 1) -- fail
+  "Test name" (suite.MODS.EXTEND(1), function()
+    ASSERT_EVENT("test")
+
+    os.queueEvent("test") -- pass
   end)
 ```
 
@@ -548,3 +552,10 @@ suite.suite "My Suite"
     -- ...
   end)
 ```
+
+#### `EXTEND`
+
+If a test is marked with `EXTEND`, when the test ends the test suite will not
+move on to the next test until a post-process function has marked it as either
+passed or failed (or a timeout occurs).
+
