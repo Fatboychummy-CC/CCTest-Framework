@@ -1,6 +1,8 @@
 --- This module compiles test data into a table of tests.
 
 local expect = require "cc.expect".expect --[[@as fun(a: number, b: any, ...: string)]]
+local test_runner = require "Framework.test_runner"
+local logger = require "Framework.logger"
 
 ---@alias test_status
 ---| '"pass"' # The test passed.
@@ -100,6 +102,39 @@ function suite.suite(name)
     tests = {}
   }
 
+  --- Run the suite.
+  ---@param dont_log_results boolean? If true, the results will not be logged. Used mainly in the suites.run_all_suites function.
+  function new_suite.run(dont_log_results)
+    logger.new_suite(new_suite.name, #new_suite.tests)
+
+    -- Check through the suite for ONLY tests.
+    local only_tests = {}
+
+    for _, test in ipairs(new_suite.tests) do
+      if test.modifiers.ONLY then
+        table.insert(only_tests, test)
+      end
+    end
+
+    -- If there are ONLY tests, run them.
+    if #only_tests > 0 then
+      print("Some tests are marked as ONLY, running only those.")
+      for _, test in ipairs(only_tests) do
+        test.run()
+      end
+    else
+      -- Otherwise, run all tests.
+      for _, test in ipairs(new_suite.tests) do
+        test.run()
+      end
+    end
+
+    -- Log the results
+    if not dont_log_results then
+      logger.log_results({new_suite})
+    end
+  end
+
   --- Insert a test (with its modifiers) into the suite.
   ---@param name string The name of the test.
   ---@param ... identifier_table|modifier_table|fun() The test to insert (or its modifiers).
@@ -123,6 +158,11 @@ function suite.suite(name)
       modifiers = {},
       failures = {},
     }
+
+    --- Run the test.
+    function test.run()
+      return test_runner(test, logger)
+    end
 
     local args = table.pack(...)
 
@@ -169,6 +209,14 @@ function suite.suite(name)
   end
 
   return setmetatable(new_suite, mt)
+end
+
+function suite.run_all_suites()
+  for _, _suite in ipairs(suite.suites) do
+    _suite.run(true)
+  end
+
+  logger.log_results(suite.suites)
 end
 
 return suite
