@@ -26,7 +26,7 @@ local function run_test(test, logger)
   if test.status == "new" then
     local coro = test.coro
     local ok, last_event_filter, event_filter, test_assertion, message
-    local resume_immediate = false
+    local resume_immediate = true -- This needs to be true so the coroutine can be initialized.
 
     test.status = "running"
     logger.update_status "running"
