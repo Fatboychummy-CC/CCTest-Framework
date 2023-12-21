@@ -349,7 +349,7 @@ end
 ---@param suites suite[] The suites to log.
 function logger.log_results(suites)
   -- First count the number of tests and failures for each suite.
-  ---@type table<suite, {tests: number, failures: number, fail_names: array_of<string>}>
+  ---@type table<suite, {tests: number, failures: number, fail_names: string[]}>
   local data = {}
   local suite_count = 0
 

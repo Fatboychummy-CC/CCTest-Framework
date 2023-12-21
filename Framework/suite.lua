@@ -2,9 +2,6 @@
 
 local expect = require "cc.expect".expect --[[@as fun(a: number, b: any, ...: string)]]
 
----@generic T
----@alias array_of<T>  table<number, T>
-
 ---@alias test_status
 ---| '"pass"' # The test passed.
 ---| '"fail"' # The test failed.
@@ -27,17 +24,15 @@ local expect = require "cc.expect".expect --[[@as fun(a: number, b: any, ...: st
 ---@field REPEAT_TIMEOUT fun(repeat_count: number, timeout: number): modifier_table A test marked as REPEAT_TIMEOUT will be repeated the specified number of times, and if the entire batch takes longer than the timeout, it will be marked as a failed test.
 ---@field REPEAT_UNTIL_FAIL identifier_table A test marked as REPEAT_UNTIL_FAIL will be repeated until it fails. Useful for debugging things that only occur sometimes.
 
----@class suite
+---@class suites
 --- ```lua
 --- local mySuite = suite.suite "My Suite"
 ---   "Test name" (function()
 ---     -- Test code here
 ---   end)
 --- ```
----@operator call(string): fun(...:identifier_table|modifier_table|fun()): suite
----@field tests array_of<test_data> The tests in the suite.
----@field MODS suite_modifiers The test modifiers for the suite.
----@field name string The name of the suite.
+---@field suites suite[] The suites that have been loaded.
+---@field MODS suite_modifiers The global test modifiers that can be used.
 local suite = {
   MODS = {
     ONLY = {},
@@ -65,7 +60,7 @@ local suite = {
     end,
     REPEAT_UNTIL_FAIL = {}
   },
-  tests = {}
+  suites = {}
 }
 
 --- Check if an identifier is valid.
@@ -96,6 +91,10 @@ end
 function suite.suite(name)
   expect(1, name, "string")
 
+  ---@class suite
+  ---@field name string The name of the suite.
+  ---@field tests test_data[] The tests in the suite.
+  ---@operator call(string): fun(...:identifier_table|modifier_table|fun()): suite
   local new_suite = {
     name = name,
     tests = {}
@@ -114,8 +113,8 @@ function suite.suite(name)
     ---@field status test_status The status of the test.
     ---@field error string|nil The error message, if the test errored.
     ---@field enabled boolean Whether the test is enabled.
-    ---@field modifiers array_of<modifier_table> The modifiers for the test.
-    ---@field failures array_of<string> The failure messages, if the test failed.
+    ---@field modifiers modifier_table[] The modifiers for the test.
+    ---@field failures string[] The failure messages, if the test failed.
     local test = {
       name = name,
       status = "new",
