@@ -102,6 +102,8 @@ function suite.suite(name)
     tests = {}
   }
 
+  table.insert(suite.suites, new_suite)
+
   --- Run the suite.
   ---@param dont_log_results boolean? If true, the results will not be logged. Used mainly in the suites.run_all_suites function.
   function new_suite.run(dont_log_results)
