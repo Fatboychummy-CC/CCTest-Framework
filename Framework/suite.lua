@@ -25,6 +25,7 @@ local logger = require "Framework.logger"
 ---@field REPEAT fun(repeat_count: number): modifier_table A test marked as REPEAT will be repeated the specified number of times.
 ---@field REPEAT_TIMEOUT fun(repeat_count: number, timeout: number): modifier_table A test marked as REPEAT_TIMEOUT will be repeated the specified number of times, and if the entire batch takes longer than the timeout, it will be marked as a failed test.
 ---@field REPEAT_UNTIL_FAIL identifier_table A test marked as REPEAT_UNTIL_FAIL will be repeated until it fails. Useful for debugging things that only occur sometimes.
+---@field POST_DELAY fun(delay: number): modifier_table A test marked as POST_DELAY will be delayed by the specified number of seconds after it has finished running.
 
 ---@class suites
 --- ```lua
@@ -169,7 +170,8 @@ function suite.suite(name)
 
     --- Run the test.
     function test.run()
-      return test_runner(test, logger)
+      test_runner.setup()
+      return test_runner.run_test(test, logger)
     end
 
     local args = table.pack(...)
@@ -225,6 +227,8 @@ function suite.run_all_suites()
   end
 
   logger.log_results(suite.suites)
+
+  test_runner.cleanup()
 end
 
 return suite

@@ -138,4 +138,23 @@ local function run_test(test, logger)
   return test
 end
 
-return run_test
+return {
+  run_test = run_test,
+
+  --- Cleanup the test runner's monitor
+  cleanup = function()
+    ---@diagnostic disable-next-line: undefined-global -- This is a CraftOS-PC class.
+    periphemu.remove(MON_NAME)
+  end,
+
+  --- Setup the test runner's monitor
+  setup = function()
+    if not peripheral.isPresent(MON_NAME) then
+      ---@diagnostic disable-next-line: undefined-global -- This is a CraftOS-PC class.
+      periphemu.create(MON_NAME, "monitor")
+    end
+    mon = peripheral.wrap(MON_NAME)
+    w, h = mon.getSize()
+    mon_window = window.create(mon, 1, 2, w, h - 1)
+  end
+}
