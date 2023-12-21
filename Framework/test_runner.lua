@@ -70,7 +70,9 @@ local function run_test(test, logger)
           logger.update_status(test.status)
           break
         elseif event_filter:match("^cctest:") then
-          if event_filter == "cctest:fail_assertion" then
+          -- If the response is a cctest response, handle it.
+          local notification = event_filter:sub(8)
+          if notification == "fail_assertion" then
             -- If an assertion failed, the test failed. Report and exit.
             test.status = "fail"
             table.insert(test.failures, message)
@@ -78,7 +80,7 @@ local function run_test(test, logger)
             logger.log_assertion(test_assertion, false, message)
 
             break
-          elseif event_filter == "cctest:fail_expectation" then
+          elseif notification == "fail_expectation" then
             -- If an expectation failed, the test should continue, but is still marked as a failure.
             test.status = "fail"
             table.insert(test.failures, message)
@@ -87,7 +89,7 @@ local function run_test(test, logger)
 
             -- We need to resume the coroutine immediately.
             resume_immediate = true
-          elseif event_filter == "cctest:pass" then
+          elseif notification == "pass" then
             -- If an assertion or expectation passed, the test should continue.
             -- We need to resume the coroutine immediately.
             resume_immediate = true
