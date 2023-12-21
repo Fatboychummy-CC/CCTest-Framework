@@ -346,10 +346,10 @@ function logger.log_stacktrace(stacktrace)
 end
 
 --- Log the results of the given suites
----@param suites test_suite[] The suites to log.
+---@param suites suite[] The suites to log.
 function logger.log_results(suites)
   -- First count the number of tests and failures for each suite.
-  ---@type table<test_suite, {tests: number, failures: number, fail_names: array_of<string>}>
+  ---@type table<suite, {tests: number, failures: number, fail_names: array_of<string>}>
   local data = {}
   local suite_count = 0
 
@@ -407,6 +407,8 @@ function logger.log_results(suites)
       end
     end
   end
+
+  print() -- put the cursor on a new line
 end
 
 return logger

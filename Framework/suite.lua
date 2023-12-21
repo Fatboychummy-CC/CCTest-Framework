@@ -18,6 +18,8 @@
 ---@field error string|nil The error message, if the test errored.
 ---@field failures array_of<string> The failure messages, if the test failed.
 
----@class test_list
----@field tests array_of<test_data> The tests.
-local test_list = {}
+---@class suite
+---@field tests array_of<test_data> The tests in the suite.
+---@field name string The name of the suite.
+local suite = {}
+
