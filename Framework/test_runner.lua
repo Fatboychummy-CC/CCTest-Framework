@@ -129,6 +129,10 @@ local function run_test(test, logger)
         end
       end
     end
+
+    if test.modifiers.POST_DELAY then
+      sleep(test.modifiers.POST_DELAY)
+    end
   end
 
   return test

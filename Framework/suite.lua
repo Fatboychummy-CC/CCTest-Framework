@@ -60,6 +60,12 @@ local suite = {
         }
       }
     end,
+    POST_DELAY = function(delay)
+      return {
+        action = "POST_DELAY",
+        value = delay
+      }
+    end,
     REPEAT_UNTIL_FAIL = {}
   },
   suites = {}

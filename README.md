@@ -556,9 +556,21 @@ suite.suite "My Suite"
   end)
 ```
 
-#### `EXTEND`
+#### `POST_DELAY`
 
-If a test is marked with `EXTEND`, when the test ends the test suite will not
-move on to the next test until a post-process function has marked it as either
-passed or failed (or a timeout occurs).
+Adds a delay (in seconds) to the end of the test, so the suite will not move
+onto the next test for that amount of time (allowing you to view the results
+of the test in the output window created, or etc.).
 
+Equivalent to putting a `sleep(x)` at the end of your test.
+
+```lua
+suite.MODS.POST_DELAY(timeout: number)
+```
+
+```lua
+suite.suite "My Suite"
+  "Test name" (suite.MODS.POST_DELAY(2), function()
+    -- ...
+  end)
+```
