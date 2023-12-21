@@ -8,6 +8,16 @@
 
 local expect = require "cc.expect".expect --[[@as fun(a: number, b: any, ...: string)]]
 
+local MON_NAME = "CCTest Test Output"
+
+if not peripheral.isPresent(MON_NAME) then
+  ---@diagnostic disable-next-line: undefined-global -- This is a CraftOS-PC class.
+  periphemu.create(MON_NAME, "monitor")
+end
+local mon = peripheral.wrap(MON_NAME)
+local w, h = mon.getSize()
+local mon_window = window.create(mon, 1, 2, w, h - 1)
+
 --- Run a single test.
 ---@param test test_data The test to run.
 ---@param logger logger The logger to use.
@@ -15,6 +25,16 @@ local expect = require "cc.expect".expect --[[@as fun(a: number, b: any, ...: st
 local function run_test(test, logger)
   expect(1, test, "table")
   logger.new_test(test.name)
+  mon.setCursorPos(1, 1)
+  mon.setBackgroundColor(colors.purple)
+  mon.setTextColor(colors.white)
+  mon.clearLine()
+  mon.write(test.name)
+  mon.setBackgroundColor(colors.black)
+  mon_window.setBackgroundColor(colors.black)
+  mon_window.setTextColor(colors.white)
+  mon_window.clear()
+  mon_window.setCursorPos(1, 1)
 
   -- If the test is disabled, skip it.
   if test.status == "disabled" then
@@ -45,7 +65,11 @@ local function run_test(test, logger)
       -- Only handle terminate events, or events that match the last event filter (or cctest events)
       if event[1] == "terminate" or event[1] == last_event_filter or last_event_filter == nil then
         -- Resume the test's coroutine.
+
+        local old = term.redirect(mon_window)
+        mon_window.restoreCursor()
         ok, event_filter, test_assertion, message = coroutine.resume(coro, table.unpack(event, 1, event.n))
+        term.redirect(old)
 
         if not ok then
           -- If the coroutine errored, the test errored. Report and exit.

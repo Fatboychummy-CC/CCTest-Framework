@@ -2,6 +2,9 @@
 
 A simple testing framework for ComputerCraft.
 
+Note: This is meant to be used with CraftOS-PC and will attach a monitor
+using periphemu.
+
 ## Usage
 
 ### Creating a test suite
