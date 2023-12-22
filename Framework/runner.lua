@@ -20,6 +20,7 @@ if not peripheral.isPresent(MON_NAME) then
   periphemu.create(MON_NAME, "monitor")
 end
 local mon = peripheral.wrap(MON_NAME)
+mon.setSize(51, 20) -- Set the monitor size to one taller than the default term size, to account for our header.
 local w, h = mon.getSize()
 local mon_window = window.create(mon, 1, 2, w, h - 1)
 
@@ -165,6 +166,7 @@ return {
       periphemu.create(MON_NAME, "monitor")
     end
     mon = peripheral.wrap(MON_NAME)
+    mon.setSize(51, 20) -- Set the monitor size to one taller than the default term size, to account for our header.
     w, h = mon.getSize()
     mon_window = window.create(mon, 1, 2, w, h - 1)
   end
