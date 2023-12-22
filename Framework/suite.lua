@@ -1,7 +1,7 @@
 --- This module compiles test data into a table of tests.
 
 local expect = require "cc.expect".expect --[[@as fun(a: number, b: any, ...: string)]]
-local test_runner = require "CCTest-Framework.Framework.runner"
+local test_runner = require "Framework.runner"
 local methods = require "Framework.methods"
 local logger = require "Framework.logger"
 
