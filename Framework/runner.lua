@@ -12,7 +12,7 @@ local MON_NAME = "CCTest Test Output"
 
 ---@diagnostic disable-next-line: undefined-global -- This is a CraftOS-PC class.
 if not periphemu then
-  error("This program requires CraftOS-PC.")
+  error("This program currently requires CraftOS-PC, though that may change in a future version.")
 end
 
 if not peripheral.isPresent(MON_NAME) then
