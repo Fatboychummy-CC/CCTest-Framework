@@ -10,6 +10,11 @@ local expect = require "cc.expect".expect --[[@as fun(a: number, b: any, ...: st
 
 local MON_NAME = "CCTest Test Output"
 
+---@diagnostic disable-next-line: undefined-global -- This is a CraftOS-PC class.
+if not periphemu then
+  error("This program requires CraftOS-PC.")
+end
+
 if not peripheral.isPresent(MON_NAME) then
   ---@diagnostic disable-next-line: undefined-global -- This is a CraftOS-PC class.
   periphemu.create(MON_NAME, "monitor")
@@ -123,6 +128,12 @@ local function run_test(test, logger)
             else
               logger.log_assertion(test_assertion, true)
             end
+          elseif notification == "force_pass" then
+            -- On a force pass, the test should just be marked as a pass.
+            test.status = "pass"
+            logger.update_status "pass"
+            logger.log_expectation("PASS", true)
+            resume_immediate = true
           end
         else -- If the response is not a cctest response, update the event filter.
           last_event_filter = event_filter

@@ -408,6 +408,28 @@ function logger.log_results(suites)
     end
   end
 
+  -- Count the number of disabled tests.
+  local disabled_tests = 0
+  for _, suite in ipairs(suites) do
+    for _, test in ipairs(suite.tests) do
+      if not test.enabled then
+        disabled_tests = disabled_tests + 1
+      end
+    end
+  end
+
+  -- Print the number of disabled tests.
+  if disabled_tests > 0 then
+    print()
+    term.blit(
+      combine_blit(
+        { bmsg(disabled_tests > 1 and "There were " or "There was ", WHITE, DEFAULT_BG_COLOR) },
+        { bmsg(tostring(disabled_tests), FAILED_COLOR, DEFAULT_BG_COLOR) },
+        { bmsg(disabled_tests > 1 and " disabled tests." or " disabled test.", WHITE, DEFAULT_BG_COLOR) }
+      )
+    )
+  end
+
   print() -- put the cursor on a new line
 end
 

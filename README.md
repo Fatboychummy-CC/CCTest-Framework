@@ -100,19 +100,19 @@ suite.suite "My Suite"
   end)
 ```
 
-#### `ASSERT_NE`
+#### `ASSERT_NEQ`
 
 Asserts that two values are not equal.
 
 ```lua
-ASSERT_NE(value_a: any, value_b: any)
+ASSERT_NEQ(value_a: any, value_b: any)
 ```
 
 ```lua
 suite.suite "My Suite"
   "Test name" (function()
-    ASSERT_NE(1, 1) -- fail
-    ASSERT_NE(1, 2) -- pass
+    ASSERT_NEQ(1, 1) -- fail
+    ASSERT_NEQ(1, 2) -- pass
   end)
 ```
 
@@ -190,6 +190,41 @@ suite.suite "My Suite"
   end)
 ```
 
+#### `ASSERT_NIL`
+
+Asserts that a value is nil.
+
+```lua
+ASSERT_NIL(value: boolean)
+```
+
+```lua
+suite.suite "My Suite"
+  "Test name" (function()
+    ASSERT_NIL(true) -- fail
+    ASSERT_NIL(32) -- fail
+    ASSERT_NIL(nil) -- pass
+  end)
+```
+
+#### `ASSERT_NOT_NIL`
+
+Asserts that a value is false.
+
+```lua
+ASSERT_NOT_NIL(value: boolean)
+```
+
+```lua
+suite.suite "My Suite"
+  "Test name" (function()
+    ASSERT_NOT_NIL(true) -- pass
+    ASSERT_NOT_NIL(32) -- pass
+    ASSERT_NOT_NIL("non-boolean") -- pass
+    ASSERT_NOT_NIL(nil) -- fail
+  end)
+```
+
 #### `ASSERT_THROWS`
 
 Asserts that a function throws any error. Variadic arguments are passed to the
@@ -222,6 +257,22 @@ suite.suite "My Suite"
     ASSERT_THROWS_MATCH(function() error("test") end, "test") -- pass
     ASSERT_THROWS_MATCH(function() error("test") end, "no match") -- fail
     ASSERT_THROWS_MATCH(function() end, "test") -- fail
+  end)
+```
+
+#### `ASSERT_NO_THROW`
+
+Asserts that a given function *does not* throw an error.
+
+```lua
+ASSERT_NO_THROW(func: fun(...: any), ...: any)
+```
+
+```lua
+suite.suite "My Suite"
+  "Test name" (function()
+    ASSERT_THROWS_MATCH(function() error("test") end) -- fail
+    ASSERT_THROWS_MATCH(function() end) -- pass
   end)
 ```
 
