@@ -228,6 +228,7 @@ function suite.run_all_suites()
     _suite.run(true)
   end
 
+  print()
   logger.log_results(suite.suites)
 
   sleep(2)
