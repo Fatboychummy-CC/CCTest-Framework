@@ -19,7 +19,8 @@ if not peripheral.isPresent(MON_NAME) then
   ---@diagnostic disable-next-line: undefined-global -- This is a CraftOS-PC class.
   periphemu.create(MON_NAME, "monitor")
 end
-local mon = peripheral.wrap(MON_NAME)
+
+local mon = peripheral.wrap(MON_NAME) --[[@as Monitor The monitor is guaranteed to exist here.]]
 mon.setSize(51, 20) -- Set the monitor size to one taller than the default term size, to account for our header.
 local w, h = mon.getSize()
 local mon_window = window.create(mon, 1, 2, w, h - 1)
@@ -165,7 +166,7 @@ return {
       ---@diagnostic disable-next-line: undefined-global -- This is a CraftOS-PC class.
       periphemu.create(MON_NAME, "monitor")
     end
-    mon = peripheral.wrap(MON_NAME)
+    mon = peripheral.wrap(MON_NAME) --[[@as Monitor]]
     mon.setSize(51, 20) -- Set the monitor size to one taller than the default term size, to account for our header.
     w, h = mon.getSize()
     mon_window = window.create(mon, 1, 2, w, h - 1)
