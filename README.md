@@ -13,6 +13,61 @@ To use this framework, you must create test "suites" that contain the tests that
 you want to run.
 
 #### Syntax
+
+This test framework can be used in two ways: As a single file, or where it
+shines best: as a set of files contained within a folder.
+
+The design of the framework is such that you can put all your tests in a folder 
+in the root alongside your main program file. Then, in your main program, you
+can add something like the following to the top:
+  
+```lua
+local args = {...}
+
+if args[1] == "test" then
+  local suite = require "suite"
+
+  suite.load_tests("/path/to/tests")
+
+  suite.run_all_suites()
+  return
+end
+
+-- your main program
+```
+
+This allows you to unit test libraries that your main program imports easily, in
+a way that is similar to testing with a makefile (i.e: `make tests`).
+
+Alternatively, you can put all this in a seperate test file and run it:
+
+```lua
+local suite = require "suite"
+suite.load_tests("/path/to/tests")
+suite.run_all_suites()
+```
+
+##### Folder file structure
+
+When using the folder structure, the framework will inject all the suite-related
+methods into the file's environment. This means that you can use the `suite`
+variable to create suites without needing to require it. For example:
+
+```lua
+suite "My Suite"
+  "Test name" (function()
+    -- Test code
+  end)
+```
+
+That's it, that's all that is needed in your test file. The framework will
+automatically load the file with the proper environment variables, then run it.
+
+##### Single-file testing
+
+You can, optionally, choose to put all your tests into a single file like a
+madman. This is not recommended as it will get cluttered, but it is possible. In
+order to do this, structure your file like so:
   
 ```lua
 local suite = require("suite") -- Import the suite
@@ -22,7 +77,18 @@ local mySuite = suite.suite "My Suite" -- Create a new suite
     -- Test code
   end)
   -- ...
+
+-- other suites...
+
+suite.run_all_suites() -- Run all loaded suites
+
+-- or, if you want to run a single suite:
+
+mySuite.run() -- Run the suite
 ```
+
+This method is slightly less optimal, as it injects all methods into the `_ENV`
+variable. It does do cleanup afterwards though.
 
 ### Package path
 
