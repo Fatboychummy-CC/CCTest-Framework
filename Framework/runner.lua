@@ -10,13 +10,11 @@ local expect = require "cc.expect".expect --[[@as fun(a: number, b: any, ...: st
 
 local MON_NAME = "CCTest Test Output"
 
----@diagnostic disable-next-line: undefined-global -- This is a CraftOS-PC class.
 if not periphemu then
   error("This program currently requires CraftOS-PC, though that may change in a future version.")
 end
 
 if not peripheral.isPresent(MON_NAME) then
-  ---@diagnostic disable-next-line: undefined-global -- This is a CraftOS-PC class.
   periphemu.create(MON_NAME, "monitor")
 end
 
@@ -156,14 +154,12 @@ return {
 
   --- Cleanup the test runner's monitor
   cleanup = function()
-    ---@diagnostic disable-next-line: undefined-global -- This is a CraftOS-PC class.
     periphemu.remove(MON_NAME)
   end,
 
   --- Setup the test runner's monitor
   setup = function()
     if not peripheral.isPresent(MON_NAME) then
-      ---@diagnostic disable-next-line: undefined-global -- This is a CraftOS-PC class.
       periphemu.create(MON_NAME, "monitor")
     end
     mon = peripheral.wrap(MON_NAME) --[[@as Monitor]]
