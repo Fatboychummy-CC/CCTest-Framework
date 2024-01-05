@@ -722,7 +722,7 @@ local mock = require("Framework.mock")
 #### Mocking an object.
 
 To create a mock object, call `mock.new` with a table of properties to mock.
-Methods can be mocked by calling `mock_object.mock_method` with the arguments
+Methods can be mocked by calling `mock_object.MOCK_METHOD` with the arguments
 being the input types.
 
 ```lua
@@ -732,8 +732,8 @@ local mock_object = mock.new {
   some_property = 32
 }
 
-mock_object.mock_method("get_some_property") -- "getter"
-mock_object.mock_method("set_some_property", "number") -- "setter"
+mock_object.MOCK_METHOD("get_some_property") -- "getter"
+mock_object.MOCK_METHOD("set_some_property", "number") -- "setter"
 -- Note that the above don't actually get or set `some_property`, read further
 -- to see how to use them.
 ```
@@ -744,7 +744,7 @@ the mock method, whose behaviour can be defined (see below).
 ##### Mocking methods
 
 When creating mocked methods, you must specify exactly what is returned and how
-many times it is returned. `mock_object.mock_method` returns a reference which
+many times it is returned. `mock_object.MOCK_METHOD` returns a reference which
 can be used to define these. If a mock method is called with no return defined,
 (or the return stack is empty), it will return nothing.
 
@@ -755,9 +755,9 @@ local mock_object = mock.new {
   some_property = 32
 }
 
-local mock_get_some_property = mock_object.mock_method("get_some_property")
+local mock_get_some_property = mock_object.MOCK_METHOD("get_some_property")
 
-mock_get_some_property.always_return(32) -- Return 32 every time the method is called
+mock_get_some_property.RETURN_ALWAYS(32) -- Return 32 every time the method is called
 ```
 
 ##### Expecting method calls
@@ -773,15 +773,15 @@ local mock_object = mock.new {
   some_property = 32
 }
 
-local mock_get_some_property = mock_object.mock_method("get_some_property")
+local mock_get_some_property = mock_object.MOCK_METHOD("get_some_property")
 
-mock_get_some_property.expect_call(2) -- Expect the method to be called once
-mock_get_some_property.return_once(32) -- Return 32 the first time the method is called
-mock_get_some_property.return_once(64) -- Return 64 the second time the method is called
+mock_get_some_property.EXPECT_CALL(2) -- Expect the method to be called once
+mock_get_some_property.RETURN_ONCE(32) -- Return 32 the first time the method is called
+mock_get_some_property.RETURN_ONCE(64) -- Return 64 the second time the method is called
 
-local mock_set_some_property = mock_object.mock_method("set_some_property")
+local mock_set_some_property = mock_object.MOCK_METHOD("set_some_property")
 
-mock_set_some_property.expect_call(1, 64) -- Expect the method to be called once with the argument 64
+mock_set_some_property.EXPECT_CALL(1, 64) -- Expect the method to be called once with the argument 64
 ```
 
 Now, assuming your test code was the following:
@@ -796,9 +796,9 @@ The test would pass, as the first call to `get_some_property` would return 32,
 the call to `set_some_property` would be called with 64, and the second call to
 `get_some_property` would return 64.
 
-##### `connects`
+##### `CONNECTS`
 
-You can also use the `connects` method to connect a mock method to a property.
+You can also use the `CONNECTS` method to connect a mock method to a property.
 Simply state if it is a getter or a setter, and it will directly alter (or
 return the value of) that property.
 
@@ -809,36 +809,69 @@ local mock_object = mock.new {
   some_property = 32
 }
 
-local mock_get_some_property = mock_object.mock_method("get_some_property")
+local mock_get_some_property = mock_object.MOCK_METHOD("get_some_property")
 
-mock_get_some_property.connects("getter", "some_property") -- Connect the mock method to the property
+mock_get_some_property.CONNECTS("getter", "some_property") -- Connect the mock method to the property
 
-local mock_set_some_property = mock_object.mock_method("set_some_property")
+local mock_set_some_property = mock_object.MOCK_METHOD("set_some_property")
 
-mock_set_some_property.connects("setter", "some_property") -- Connect the mock method to the property
+mock_set_some_property.CONNECTS("setter", "some_property") -- Connect the mock method to the property
 ```
 
-This makes it so you do not have to set up `always_return` or `return_once` for
+This makes it so you do not have to set up `RETURN_ALWAYS` or `RETURN_ONCE` for
 simple getters or setters.
 
 ##### Mock method methods
 
 The following methods are available on mock methods:
 
-- `always_return(...: any)`: Always return the given values when the method is
+- `RETURN_ALWAYS(...: any)`: Always return the given values when the method is
   called.
-- `return_once(...: any)`: Return the given values the next time the method is
+- `RETURN_ONCE(...: any)`: Return the given values the next time the method is
   called. These can be chained to return different values on subsequent calls.
-- `return_n(n: number, ...: any)`: Return the given values the next `n` times
+- `RETURN_N(n: number, ...: any)`: Return the given values the next `n` times
   the method is called. These can be chained to return different values on
   subsequent calls.
-- `expect_call(times: number, ...: any)`: Expect the method to be called the
+- `EXPECT_CALL(times: number, ...: any)`: Expect the method to be called the
   given number of times with the given arguments. These can be chained to
   expect different arguments on subsequent calls.
-- `assert_call(times: number, ...: any)`: Assert that the method was called the
+- `ASSERT_CALL(times: number, ...: any)`: Assert that the method was called the
   given number of times with the given arguments. These can be chained to
   assert different arguments on subsequent calls.
 
-`expect_call` and `assert_call` work in the same way as a test expectation or
-assertion. If `expect_call` fails, it will fail the test, but still continue the
-test. If an `assert_call` fails, it will fail the test and stop the test.
+`EXPECT_CALL` and `ASSERT_CALL` work in the same way as a test expectation or
+assertion. If `EXPECT_CALL` fails, it will fail the test, but still continue the
+test. If an `ASSERT_CALL` fails, it will fail the test and stop the test.
+
+##### Mock method additions
+
+The following additions have been added to mock methods to make using them
+easier (found in `mock.AID`):
+
+- `AT_LEAST(n: number)`: Assert that the method was called at least `n` times.
+
+```lua
+local mock_get_some_property = mock_object.MOCK_METHOD("get_some_property")
+
+mock_get_some_property.RETURN_ALWAYS(32) -- Return 32 every time the method is called
+mock_get_some_property.EXPECT_CALL(mock.AID.AT_LEAST(2)) -- Expect the method to be called at least twice
+```
+
+- `AT_MOST(n: number)`: Assert that the method was called at most `n` times.
+
+```lua
+local mock_get_some_property = mock_object.MOCK_METHOD("get_some_property")
+
+mock_get_some_property.RETURN_ALWAYS(32) -- Return 32 every time the method is called
+mock_get_some_property.EXPECT_CALL(mock.AID.AT_MOST(2)) -- Expect the method to be called at most twice
+```
+
+- `BETWEEN(n: number, m: number)`: Assert that the method was called between `n`
+  and `m` times.
+
+```lua
+local mock_get_some_property = mock_object.MOCK_METHOD("get_some_property")
+
+mock_get_some_property.RETURN_ALWAYS(32) -- Return 32 every time the method is called
+mock_get_some_property.EXPECT_CALL(mock.AID.BETWEEN(2, 4)) -- Expect the method to be called between 2 and 4 times
+```
