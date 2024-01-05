@@ -1,9 +1,6 @@
-local suite = require "Framework.suite"
---require "Framework.logger".verbose = true
-
 ---@diagnostic disable: undefined-global We will be using a bunch of globals here defined in another location.
 
-local mySuite = suite.suite "Suite Methods"
+suite.suite "Methods Work"
   "Pass" (function()
     PASS()
   end)
@@ -269,4 +266,36 @@ local mySuite = suite.suite "Suite Methods"
   "ASSERT_DEEP_EQ (Should fail)" (function()
     ASSERT_DEEP_EQ({1, 2, 3}, {1, 2, 4})
     ASSERT_DEEP_EQ({x={1, 2, 3}}, {x={1, 2, 4}})
+  end)
+  "EXPECT_EVENT Pass" (function()
+    os.queueEvent("test")
+    EXPECT_EVENT("test")
+    sleep(1)
+  end)
+  "EXPECT_EVENT (Should fail)" (function()
+    os.queueEvent("test")
+    EXPECT_EVENT("test2")
+    sleep(1)
+  end)
+  "ASSERT_EVENT Pass" (function()
+    os.queueEvent("test")
+    ASSERT_EVENT("test")
+    sleep(1)
+  end)
+  "ASSERT_EVENT (Should fail)" (function()
+    os.queueEvent("test")
+    ASSERT_EVENT("test2")
+    sleep(1)
+  end)
+  "EXPECT_TIMEOUT Pass" (function()
+    EXPECT_TIMEOUT(1, function() end)
+  end)
+  "EXPECT_TIMEOUT (Should fail)" (function()
+    EXPECT_TIMEOUT(1, function() sleep(2) end)
+  end)
+  "ASSERT_TIMEOUT Pass" (function()
+    ASSERT_TIMEOUT(1, function() end)
+  end)
+  "ASSERT_TIMEOUT (Should fail)" (function()
+    ASSERT_TIMEOUT(1, function() sleep(2) end)
   end)
