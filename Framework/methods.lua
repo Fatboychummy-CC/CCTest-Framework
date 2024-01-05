@@ -252,6 +252,9 @@ end)
 
 generate_for_both("DEEP_EQ", function(fail_event, name)
   return function(a, b)
+    expect(1, a, "table")
+    expect(2, b, "table")
+
     local function eq_one_way(_a, _b)
       if type(_a) ~= type(_b) then
         return false
@@ -270,7 +273,7 @@ generate_for_both("DEEP_EQ", function(fail_event, name)
     end
 
     if not eq_one_way(a, b) or not eq_one_way(b, a) then
-      coroutine.yield(fail_event, name, ("Values %s and %s are not deeply equal."):format(tostring(a), tostring(b)))
+      coroutine.yield(fail_event, name, "Tables are not deeply equal.")
       return
     end
     coroutine.yield("cctest:pass", name)
