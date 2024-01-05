@@ -136,6 +136,24 @@ function logger.new_suite(name, test_count)
   print()
 end
 
+--- Display a closing message for the suite.
+--- @param name string The name of the suite.
+function logger.close_suite(name)
+  expect(1, name, "string")
+
+  print()
+
+  term.blit(
+    combine_blit(
+      { bmsg("Finished suite ", WHITE, DEFAULT_BG_COLOR) },
+      { bmsg(name, SUITE_NAME_COLOR, DEFAULT_BG_COLOR) },
+      { bmsg(".", WHITE, DEFAULT_BG_COLOR) }
+    )
+  )
+
+  print()
+end
+
 --- Shift logger focus to a new test.
 ---@param name string The name of the test.
 function logger.new_test(name)

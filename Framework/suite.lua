@@ -140,7 +140,9 @@ function suite.suite(name)
     end
 
     -- Log the results
-    if not dont_log_results then
+    if dont_log_results then
+      logger.close_suite(new_suite.name)
+    else
       logger.log_results({new_suite})
     end
   end
