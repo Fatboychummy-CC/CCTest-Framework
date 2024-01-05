@@ -252,6 +252,10 @@ end
 --- Load all test suites in a folder, runs recursively so you can have subfolders.
 --- @param path string The path to the folder.
 function suite.load_tests(path)
+  if not fs.exists(path) then
+    error("Path " .. path .. " does not exist.", 2)
+  end
+
   local env = setmetatable({
     suite = suite
   }, {__index = _ENV})
