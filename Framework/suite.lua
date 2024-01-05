@@ -167,12 +167,15 @@ function suite.suite(name)
       enabled = true,
       modifiers = {},
       failures = {},
+      test_env = _ENV._cctest_env or _ENV
     }
 
     --- Run the test.
     function test.run()
       test_runner.setup()
-      methods.inject()
+      if not test.test_env._cctest_injected then
+        methods.inject(test.test_env)
+      end
       return test_runner.run_test(test, logger)
     end
 
@@ -232,8 +235,65 @@ function suite.run_all_suites()
   logger.log_results(suite.suites)
 
   sleep(2)
+  suite.cleanup()
+end
+
+--- Perform all cleanup operations.
+function suite.cleanup()
+  if methods.injected(_ENV) then
+    methods.cleanup()
+  end
   test_runner.cleanup()
-  methods.cleanup()
+
+  _ENV._cctest_env = nil
+  suite.suites = {}
+end
+
+--- Load all test suites in a folder, runs recursively so you can have subfolders.
+--- @param path string The path to the folder.
+function suite.load_tests(path)
+  local env = setmetatable({
+    suite = suite
+  }, {__index = _ENV})
+
+  methods.inject(env)
+  _ENV._cctest_env = env
+
+  local function load_file(path)
+    local file = fs.open(path, "r") --[[@as ReadHandle?]]
+    if file then
+      local data = file.readAll()
+      file.close()
+
+      if data then
+        local func, err = load(data, "=" .. path, "t", env)
+        if not func then
+          error(err, 0)
+        end
+
+        local ok, err = pcall(func)
+        if not ok then
+          error(err, 0)
+        end
+      else
+        error("Could not read file " .. path, 0)
+      end
+    else
+      error("Could not open file " .. path, 0)
+    end
+  end
+
+  -- Load and run all files in the folder.
+  local files = fs.list(path)
+  for _, file in ipairs(files) do
+    local full_path = fs.combine(path, file)
+
+    if fs.isDir(full_path) then
+      suite.load_tests(full_path)
+    else
+      load_file(full_path)
+    end
+  end
 end
 
 return suite

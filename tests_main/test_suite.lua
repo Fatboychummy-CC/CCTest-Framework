@@ -267,10 +267,3 @@ local mySuite = suite.suite "Suite Methods"
     ASSERT_DEEP_EQ({1, 2, 3}, {1, 2, 4})
     ASSERT_DEEP_EQ({x={1, 2, 3}}, {x={1, 2, 4}})
   end)
-
-
-
--- Load the other test suite.
-require("multisuite_test")
-
-suite.run_all_suites()

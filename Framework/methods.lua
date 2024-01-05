@@ -281,21 +281,33 @@ methods.funcs.PASS = function()
   coroutine.yield("cctest:force_pass")
 end
 
-methods.funcs.FAIL = function()
-  coroutine.yield("cctest:fail_expectation", "FAIL", "Manual failure.")
+methods.funcs.FAIL = function(reason)
+  coroutine.yield("cctest:fail_expectation", "FAIL", reason or "Manual failure.")
 end
 
 --- Inject the methods into the global environment.
-function methods.inject()
+---@param env table? The environment to inject the methods into. Defaults to _ENV.
+function methods.inject(env)
+  env = env or _ENV
   for name, func in pairs(methods.funcs) do
-    _G[name] = func
+    env[name] = func
   end
+
+  env._cctest_injected = true
+end
+
+--- Check if cctest is injected in an environment.
+---@param env table? The environment to check. Defaults to _ENV.
+---@return boolean injected Whether cctest is injected.
+function methods.injected(env)
+  env = env or _ENV
+  return env._cctest_injected == true
 end
 
 --- Remove the methods from the global environment.
 function methods.cleanup()
   for name, func in pairs(methods.funcs) do
-    _G[name] = nil
+    _ENV[name] = nil
   end
 end
 
