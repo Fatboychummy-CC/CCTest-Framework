@@ -2,7 +2,7 @@
 
 local expect = require "cc.expect".expect --[[@as fun(a: number, b: any, ...: string)]]
 local test_runner = require "Framework.runner"
-local methods = require "Framework.methods"
+local methods = require "Framework.assertions"
 local logger = require "Framework.logger"
 
 ---@alias test_status
