@@ -719,7 +719,7 @@ and functions. To use it, require `Framework.mock`:
 local mock = require("Framework.mock")
 ```
 
-#### Mocking an object.
+#### Mocking an object
 
 To create a mock object, call `mock.new` with a table of properties to mock.
 Methods can be mocked by calling `mock_object.MOCK_METHOD` with the arguments
@@ -775,13 +775,13 @@ local mock_object = mock.new {
 
 local mock_get_some_property = mock_object.MOCK_METHOD("get_some_property")
 
-mock_get_some_property.EXPECT_CALL(2) -- Expect the method to be called once
+mock_get_some_property.EXPECT_CALL(2) -- Expect the method to be called twice
 mock_get_some_property.RETURN_ONCE(32) -- Return 32 the first time the method is called
 mock_get_some_property.RETURN_ONCE(64) -- Return 64 the second time the method is called
 
 local mock_set_some_property = mock_object.MOCK_METHOD("set_some_property")
 
-mock_set_some_property.EXPECT_CALL(1, 64) -- Expect the method to be called once with the argument 64
+mock_set_some_property.EXPECT_CALL(1, 64) -- Expect the method to be called once with the argument `64`
 ```
 
 Now, assuming your test code was the following:
@@ -795,6 +795,9 @@ property = mock_object.get_some_property()
 The test would pass, as the first call to `get_some_property` would return 32,
 the call to `set_some_property` would be called with 64, and the second call to
 `get_some_property` would return 64.
+
+Thus, total calls to `get_some_property` would be 2, and total calls to
+`set_some_property` would be 1 -- which is what we were expecting!
 
 ##### `CONNECTS`
 
@@ -854,7 +857,7 @@ easier (found in `mock.AID`):
 local mock_get_some_property = mock_object.MOCK_METHOD("get_some_property")
 
 mock_get_some_property.RETURN_ALWAYS(32) -- Return 32 every time the method is called
-mock_get_some_property.EXPECT_CALL(mock.AID.AT_LEAST(2)) -- Expect the method to be called at least twice
+mock_get_some_property.EXPECT_CALL(mock.AID.AT_LEAST(2)) -- Expect the method to be called at least twice with no arguments
 ```
 
 - `AT_MOST(n: number)`: Assert that the method was called at most `n` times.
@@ -863,7 +866,7 @@ mock_get_some_property.EXPECT_CALL(mock.AID.AT_LEAST(2)) -- Expect the method to
 local mock_get_some_property = mock_object.MOCK_METHOD("get_some_property")
 
 mock_get_some_property.RETURN_ALWAYS(32) -- Return 32 every time the method is called
-mock_get_some_property.EXPECT_CALL(mock.AID.AT_MOST(2)) -- Expect the method to be called at most twice
+mock_get_some_property.EXPECT_CALL(mock.AID.AT_MOST(2)) -- Expect the method to be called at most twice with no arguments
 ```
 
 - `BETWEEN(n: number, m: number)`: Assert that the method was called between `n`
@@ -873,5 +876,19 @@ mock_get_some_property.EXPECT_CALL(mock.AID.AT_MOST(2)) -- Expect the method to 
 local mock_get_some_property = mock_object.MOCK_METHOD("get_some_property")
 
 mock_get_some_property.RETURN_ALWAYS(32) -- Return 32 every time the method is called
-mock_get_some_property.EXPECT_CALL(mock.AID.BETWEEN(2, 4)) -- Expect the method to be called between 2 and 4 times
+mock_get_some_property.EXPECT_CALL(mock.AID.BETWEEN(2, 4)) -- Expect the method to be called between 2 and 4 times with no arguments.
 ```
+
+#### Mocking notes
+
+1. Mock method objects can be chain called, which means you can do the
+  following:
+
+```lua
+mock_object.MOCK_METHOD("get_some_property")
+  .RETURN_ALWAYS(32)
+  .EXPECT_CALL(2)
+```
+
+instead of doing the long-form shown in previous examples.
+
