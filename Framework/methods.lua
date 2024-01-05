@@ -288,6 +288,10 @@ methods.funcs.FAIL = function(reason)
   coroutine.yield("cctest:fail_expectation", "FAIL", reason or "Manual failure.")
 end
 
+methods.funcs.END = function(reason)
+  coroutine.yield("cctest:fail_assertion", "END", reason or "Manual failure.")
+end
+
 --- Inject the methods into the global environment.
 ---@param env table? The environment to inject the methods into. Defaults to _ENV.
 function methods.inject(env)

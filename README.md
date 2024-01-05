@@ -132,12 +132,12 @@ local mySuite = suite.suite "My Suite"
 mySuite.run() -- Run the suite
 ```
 
-To run all suites, use the `run_all` function.
+To run all suites, use the `run_all_suites` function.
 
 ```lua
 local suite = require("suite")
 
-suite.run_all() -- Run all loaded suites
+suite.run_all_suites() -- Run all loaded suites
 ```
 
 ### Assertions
@@ -275,7 +275,7 @@ suite.suite "My Suite"
 
 #### `ASSERT_NOT_NIL`
 
-Asserts that a value is false.
+Asserts that a value is not nil.
 
 ```lua
 ASSERT_NOT_NIL(value: boolean)
@@ -337,8 +337,8 @@ ASSERT_NO_THROW(func: fun(...: any), ...: any)
 ```lua
 suite.suite "My Suite"
   "Test name" (function()
-    ASSERT_THROWS_MATCH(function() error("test") end) -- fail
-    ASSERT_THROWS_MATCH(function() end) -- pass
+    ASSERT_NO_THROW(function() error("test") end) -- fail
+    ASSERT_NO_THROW(function() end) -- pass
   end)
 ```
 
@@ -371,10 +371,9 @@ suite.suite "My Suite"
 #### `ASSERT_EVENT`
 
 Asserts that an event is emitted some time during this test. Variadic arguments
-are used for further comparison of the event (if included).
-
-This assertion will create a post-process task that will wait for the event to
-be emitted, so it is recommended to be used with the `EXTEND` modifier.
+can be used for further comparison of the event. It is recommended that, if 
+using this assertion, you should also include the `EXTEND` test modifier, to
+ensure that the test does not end before the event is emitted.
 
 ```lua
 ASSERT_EVENT(event: string, ...: any)
@@ -382,7 +381,7 @@ ASSERT_EVENT(event: string, ...: any)
 
 ```lua
 suite.suite "My Suite"
-  "Test name" (suite.MODS.EXTEND(1), function()
+  "Test name" (suite.MODS.EXTEND(0.1), function()
     ASSERT_EVENT("test")
 
     os.queueEvent("test") -- pass
@@ -554,7 +553,7 @@ suite.suite "My Suite"
 Forcefully fails the test.
 
 ```lua
-FAIL()
+FAIL(reason: string = "Manual failure.")
 ```
 
 ```lua
@@ -564,7 +563,25 @@ suite.suite "My Suite"
   end)
 ```
 
+#### `END`
+
+Forcefully end the test. This is equivalent to an assertion failing.
+
+```lua
+END(reason: string = "Manual failure.")
+```
+
+```lua
+suite.suite "My Suite"
+  "Test name" (function()
+    END() -- fail
+  end)
+```
+
 ### Test modifiers
+
+Test modifiers change the way a test works. They are applied to a test by
+placing them before the test function. 
 
 Multiple modifiers can be applied to a test. For example, you can apply both
 `REPEAT` and `TIMEOUT` to a test like so:
@@ -582,7 +599,8 @@ than 3 seconds to run.
 #### `ONLY`
 
 If a test is marked with `ONLY`, only that test will be run. All other tests
-will be ignored (unless they have `ONLY` as well).
+will be ignored (unless they have `ONLY` as well). Useful for debugging a single
+issue.
 
 ```lua
 suite.suite "My Suite"
