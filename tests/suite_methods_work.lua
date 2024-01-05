@@ -1,13 +1,13 @@
 ---@diagnostic disable: undefined-global We will be using a bunch of globals here defined in another location.
 
 suite.suite "Methods Work"
-  "Pass" (function()
+  "PASS" (function()
     PASS()
   end)
-  "Fail" (function()
+  "FAIL (Should fail)" (function()
     FAIL()
   end)
-  "END" (function()
+  "END (Should fail)" (function()
     END()
   end)
   "Pass after failure" (function()
