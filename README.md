@@ -151,8 +151,12 @@ will instead mark the test as failed. The test will continue to run, and will
 fail if it reaches the end of the test without `PASS()`ing.
 
 ```diff
-! Warning: Assertions and expectations cannot be used outside of a test.
-! Doing so will cause your program to hang.
+===================================================================
+@@                            WARNING                            @@
+===================================================================
+- Assertations and expectations CANNOT be used outside of a test.
+- Doing so will cause your program to hang.
+===================================================================
 ```
 
 #### `ASSERT_EQ`
@@ -854,13 +858,15 @@ assertion. If `EXPECT_CALL` fails, it will fail the test, but still continue the
 test. If an `ASSERT_CALL` fails, it will fail the test and stop the test.
 
 ```diff
-🟠🟠🟠🟠
-! Warning: The above methods CANNOT be used outside of a test.
-! Doing so will cause your program to hang.
-🟠🟠🟠🟠
+=======================================================
+@@                      WARNING                      @@
+=======================================================
+- The above methods CANNOT be used outside of a test.
+- Doing so will cause your program to hang.
+=======================================================
 ```
 
-$${\textsf{\color{red}Warning: The above methods CANNOT be used outside of a test. Doing so will cause your program to hang.}}$$
+$${\textsf{\color{red}Warning: The above methods CANNOT be used outside of a test. Doing so will cause your program to hang. long text to test wrappi}}$$
 
 ##### Mock method additions
 
