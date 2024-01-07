@@ -150,6 +150,11 @@ prefix with `EXPECT_`. Expectations will not stop the test if they fail, but
 will instead mark the test as failed. The test will continue to run, and will
 fail if it reaches the end of the test without `PASS()`ing.
 
+```diff
+! Warning: Assertions and expectations cannot be used outside of a test. Doing
+! so will cause your program to hang.
+```
+
 #### `ASSERT_EQ`
 
 Asserts that two values are equal.
@@ -829,7 +834,9 @@ simple getters or setters.
 The following methods are available on mock methods:
 
 - `RETURN_ALWAYS(...: any)`: Always return the given values when the method is
-  called.
+  called. Note that `RETURN_ALWAYS` can be used after `RETURN_ONCE` or
+  `RETURN_N` and those will occur before the `RETURN_ALWAYS` values are
+  returned.
 - `RETURN_ONCE(...: any)`: Return the given values the next time the method is
   called. These can be chained to return different values on subsequent calls.
 - `RETURN_N(n: number, ...: any)`: Return the given values the next `n` times
@@ -845,6 +852,11 @@ The following methods are available on mock methods:
 `EXPECT_CALL` and `ASSERT_CALL` work in the same way as a test expectation or
 assertion. If `EXPECT_CALL` fails, it will fail the test, but still continue the
 test. If an `ASSERT_CALL` fails, it will fail the test and stop the test.
+
+```diff
+! Warning: The above methods CANNOT be used outside of a test. Doing so will
+! cause your program to hang.
+```
 
 ##### Mock method additions
 
