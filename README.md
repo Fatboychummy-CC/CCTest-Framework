@@ -849,13 +849,9 @@ The following methods are available on mock methods:
 - `EXPECT_CALL(times: number, ...: any)`: Expect the method to be called the
   given number of times with the given arguments. These can be chained to
   expect different arguments on subsequent calls.
-- `ASSERT_CALL(times: number, ...: any)`: Assert that the method was called the
-  given number of times with the given arguments. These can be chained to
-  assert different arguments on subsequent calls.
 
-`EXPECT_CALL` and `ASSERT_CALL` work in the same way as a test expectation or
-assertion. If `EXPECT_CALL` fails, it will fail the test, but still continue the
-test. If an `ASSERT_CALL` fails, it will fail the test and stop the test.
+There is no `ASSERT_CALL` method, as all mock expectations are checked at the
+end of the test (and thus the test would already be over).
 
 ```diff
 =======================================================

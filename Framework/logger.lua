@@ -44,6 +44,8 @@ local function format_status(status)
     return "[ NEW ]: ", "099999000", "fffffffff"
   elseif status == "running" then
     return "[ RUN ]: ", "000000000", "fffffffff"
+  elseif status == "post" then
+    return "[POST ]: ", "088880000", "fffffffff"
   end
 
   return "[?????]: ", "044444000", "fffffffff"

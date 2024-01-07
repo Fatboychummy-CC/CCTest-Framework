@@ -8,6 +8,7 @@ local logger = require "Framework.logger"
 ---@alias test_status
 ---| '"pass"' # The test passed.
 ---| '"fail"' # The test failed.
+---| '"post"' # Checking post-test assertions/expectations.
 ---| '"error"' # The test errored.
 ---| '"disabled"' # The test was disabled (and will be skipped).
 ---| '"new"' # The test has not been run yet.
