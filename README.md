@@ -860,7 +860,7 @@ test. If an `ASSERT_CALL` fails, it will fail the test and stop the test.
 🟠🟠🟠🟠
 ```
 
-$${\color{red}\text{Warning: The above methods CANNOT be used outside of a test. Doing so will cause your program to hang.}}$$
+$${\textfs{\color{red}Warning: The above methods CANNOT be used outside of a test. Doing so will cause your program to hang.}}$$
 
 ##### Mock method additions
 
