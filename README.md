@@ -154,8 +154,8 @@ fail if it reaches the end of the test without `PASS()`ing.
 ===================================================================
 @@                            WARNING                            @@
 ===================================================================
-- Assertations and expectations CANNOT be used outside of a test.
-- Doing so will cause your program to hang.
+- Assertations and expectations CANNOT be used outside of a test. -
+- Doing so will cause your program to hang.                       -
 ===================================================================
 ```
 
@@ -861,12 +861,10 @@ test. If an `ASSERT_CALL` fails, it will fail the test and stop the test.
 =======================================================
 @@                      WARNING                      @@
 =======================================================
-- The above methods CANNOT be used outside of a test.
-- Doing so will cause your program to hang.
+- The above methods CANNOT be used outside of a test. -
+- Doing so will cause your program to hang.           -
 =======================================================
 ```
-
-$${\textsf{\color{red}Warning: The above methods CANNOT be used outside of a test. Doing so will cause your program to hang. long text to test wrappi}}$$
 
 ##### Mock method additions
 
