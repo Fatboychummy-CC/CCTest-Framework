@@ -422,6 +422,9 @@ suite.suite "My Suite"
 -  If you are testing a busy-waiting method, it is possible for the test to  -
 -              fail with the 'Too long without yielding' error.              -
 ==============================================================================
+## I have ideas for workarounds to this, but I'm not sure how elegant they  ##
+##                                 would be.                                ##
+==============================================================================
 ```
 
 #### `ASSERT_GT`
