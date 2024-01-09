@@ -414,6 +414,16 @@ suite.suite "My Suite"
   end)
 ```
 
+```diff
+==============================================================================
+@@                                  WARNING                                 @@
+==============================================================================
+- This method, due to the way CC and Lua work, is unable to stop busy loops. -
+-  If you are testing a busy-waiting method, it is possible for the test to  -
+-              fail with the 'Too long without yielding' error.              -
+==============================================================================
+```
+
 #### `ASSERT_GT`
 
 Asserts that a value is greater than another value.
