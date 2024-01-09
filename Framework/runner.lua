@@ -106,6 +106,8 @@ local function run_test(test, logger)
 
           logger.update_status(test.status)
           break
+        elseif event_filter == nil then
+          last_event_filter = nil
         elseif event_filter:match("^cctest:") then
           -- If the response is a cctest response, handle it.
           local notification = event_filter:sub(8)

@@ -280,6 +280,49 @@ generate_for_both("DEEP_EQ", function(fail_event, name)
   end
 end)
 
+generate_for_both("TIMEOUT", function(fail_event, name)
+  return function(func, time, ...)
+    expect(1, func, "function")
+    expect(2, time, "number")
+
+    local timer = os.startTimer(time)
+    local args = table.pack(...)
+    local start_time = os.epoch "utc"
+
+    local killed = false
+
+    parallel.waitForAny(
+      function()
+        func(table.unpack(args, 1, args.n))
+      end,
+      function()
+        while true do
+          local event = {os.pullEvent()}
+          if event[1] == "timer" and event[2] == timer then
+            killed = true
+            return
+          end
+        end
+      end
+    )
+
+    local end_time = os.epoch "utc"
+
+    if killed then
+      coroutine.yield(fail_event, name, ("Function did not complete within %d seconds."):format(time))
+      return
+    end
+
+
+    if end_time - start_time > time * 1000 then
+      coroutine.yield(fail_event, name, ("Function took %d seconds to complete, but should have taken less than %d seconds."):format((end_time - start_time) / 1000, time))
+      return
+    end
+
+    coroutine.yield("cctest:pass", name)
+  end
+end)
+
 methods.funcs.PASS = function()
   coroutine.yield("cctest:force_pass")
 end

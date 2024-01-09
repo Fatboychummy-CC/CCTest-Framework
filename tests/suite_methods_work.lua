@@ -293,9 +293,21 @@ suite.suite "Methods Work"
   "EXPECT_TIMEOUT (Should fail)" (function()
     EXPECT_TIMEOUT(function() sleep(2) end, 1)
   end)
+  "EXPECT_TIMEOUT (Should fail, busy-waiting)" (function()
+    EXPECT_TIMEOUT(function()
+      local time = os.epoch "utc"
+      while os.epoch "utc" - time < 2000 do end
+    end, 1)
+  end)
   "ASSERT_TIMEOUT Pass" (function()
     ASSERT_TIMEOUT(function() end, 1)
   end)
   "ASSERT_TIMEOUT (Should fail)" (function()
     ASSERT_TIMEOUT(function() sleep(2) end, 1)
+  end)
+  "ASSERT_TIMEOUT (Should fail, busy-waiting)" (function()
+    ASSERT_TIMEOUT(function()
+      local time = os.epoch "utc"
+      while os.epoch "utc" - time < 2000 do end
+    end, 1)
   end)
