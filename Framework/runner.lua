@@ -107,6 +107,12 @@ local function run_test(test, logger)
           logger.update_status(test.status)
           break
         elseif event_filter == nil then
+          -- If no event filter was passed (i.e: called `os.pullEvent()` with no
+          -- arguments), set the event filter to anything.
+          -- This has the added benefit of not causing `attempt to index nil
+          -- value` errors in the next few elseifs.
+          -- ...
+          -- Yes, I forgot to add this in originally, how could you tell?
           last_event_filter = nil
         elseif event_filter:match("^cctest:") then
           -- If the response is a cctest response, handle it.
