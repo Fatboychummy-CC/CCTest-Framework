@@ -91,13 +91,13 @@ local function run_test(test, logger)
       -- failure), do so.
       if resume_immediate then
         event = next_event or { n = 0 }
-        resume_immediate = false
       else
         event = table.pack(os.pullEventRaw())
       end
 
       -- Only handle terminate events, or events that match the last event filter (or cctest events)
-      if event[1] == "terminate" or event[1] == last_event_filter or last_event_filter == nil then
+      if event[1] == "terminate" or event[1] == last_event_filter or last_event_filter == nil or resume_immediate then
+        resume_immediate = false
         -- Resume the test's coroutine.
 
         local old = term.redirect(mon_window)
