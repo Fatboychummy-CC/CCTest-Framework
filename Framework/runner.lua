@@ -16,6 +16,9 @@ local CALLER_FORMATTER = "%s: %s"
 local periphemu = periphemu
 local no_periphemu = false
 
+local periphemu = periphemu
+local no_periphemu = false
+
 if not periphemu then
   no_periphemu = true
   periphemu = {
