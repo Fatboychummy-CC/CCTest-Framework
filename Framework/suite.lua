@@ -273,7 +273,7 @@ function suite.load_tests(path)
       file.close()
 
       if data then
-        local func, err = load(data, "=" .. path, "t", env)
+        local func, err = load(data, "@" .. path, "t", env)
         if not func then
           error(err, 0)
         end

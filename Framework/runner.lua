@@ -10,9 +10,30 @@ local expect = require "cc.expect".expect --[[@as fun(a: number, b: any, ...: st
 local mock = require "Framework.mock"
 
 local MON_NAME = "CCTest Test Output"
+local CALLER_FORMATTER = "%s: %s"
+
+---@diagnostic disable-next-line: undefined-global
+local periphemu = periphemu
+local no_periphemu = false
 
 if not periphemu then
-  error("This program currently requires CraftOS-PC, though that may change in a future version.")
+  no_periphemu = true
+  periphemu = {
+    create = function(...)
+      local mon = peripheral.find("monitor")
+      if not mon then
+        error("No monitor found.", 0)
+      end
+      MON_NAME = peripheral.getName(mon)
+      print("Found monitor:", MON_NAME)
+    end,
+    remove = function(name)
+      expect(1, name, "string")
+      peripheral.call(MON_NAME, "setBackgroundColor", colors.black)
+      peripheral.call(MON_NAME, "setTextColor", colors.white)
+      peripheral.call(MON_NAME, "clear")
+    end
+  }
 end
 
 if not peripheral.isPresent(MON_NAME) then
@@ -20,7 +41,10 @@ if not peripheral.isPresent(MON_NAME) then
 end
 
 local mon = peripheral.wrap(MON_NAME) --[[@as Monitor The monitor is guaranteed to exist here.]]
-mon.setSize(51, 20) -- Set the monitor size to one taller than the default term size, to account for our header.
+
+if not no_periphemu then
+  mon.setSize(51, 20) -- Set the monitor size to one taller than the default term size, to account for our header.
+end
 local w, h = mon.getSize()
 local mon_window = window.create(mon, 1, 2, w, h - 1)
 
@@ -56,7 +80,7 @@ local function run_test(test, logger)
   -- If the test is new, run it.
   if test.status == "new" then
     local coro = test.coro
-    local ok, last_event_filter, event_filter, test_assertion, message
+    local ok, last_event_filter, caller, event_filter, test_assertion, message
     local resume_immediate = true -- This needs to be true so the coroutine can be initialized.
 
     test.status = "running"
@@ -69,18 +93,18 @@ local function run_test(test, logger)
       -- failure), do so.
       if resume_immediate then
         event = next_event or { n = 0 }
-        resume_immediate = false
       else
         event = table.pack(os.pullEventRaw())
       end
 
       -- Only handle terminate events, or events that match the last event filter (or cctest events)
-      if event[1] == "terminate" or event[1] == last_event_filter or last_event_filter == nil then
+      if event[1] == "terminate" or event[1] == last_event_filter or last_event_filter == nil or resume_immediate then
+        resume_immediate = false
         -- Resume the test's coroutine.
 
         local old = term.redirect(mon_window)
         mon_window.restoreCursor()
-        ok, event_filter, test_assertion, message = coroutine.resume(coro, table.unpack(event, 1, event.n))
+        ok, event_filter, caller, test_assertion, message = coroutine.resume(coro, table.unpack(event, 1, event.n))
         term.redirect(old)
 
         if not ok then
@@ -120,17 +144,17 @@ local function run_test(test, logger)
           if notification == "fail_assertion" then
             -- If an assertion failed, the test failed. Report and exit.
             test.status = "fail"
-            table.insert(test.failures, message)
+            table.insert(test.failures, CALLER_FORMATTER:format(caller, message))
             logger.update_status "fail"
-            logger.log_assertion(test_assertion, false, message)
+            logger.log_assertion(test_assertion, false, CALLER_FORMATTER:format(caller, message))
 
             break
           elseif notification == "fail_expectation" then
             -- If an expectation failed, the test should continue, but is still marked as a failure.
             test.status = "fail"
-            table.insert(test.failures, message)
+            table.insert(test.failures, CALLER_FORMATTER:format(caller, message))
             logger.update_status "fail"
-            logger.log_expectation(test_assertion, false, message)
+            logger.log_expectation(test_assertion, false, CALLER_FORMATTER:format(caller, message))
 
             -- We need to resume the coroutine immediately.
             resume_immediate = true
@@ -140,15 +164,15 @@ local function run_test(test, logger)
             resume_immediate = true
 
             if test_assertion:match("^EXPECT_") then
-              logger.log_expectation(test_assertion, true)
+              logger.log_expectation(test_assertion, true, nil)
             else
-              logger.log_assertion(test_assertion, true)
+              logger.log_assertion(test_assertion, true, nil)
             end
           elseif notification == "force_pass" then
             -- On a force pass, the test should just be marked as a pass.
             test.status = "pass"
             logger.update_status "pass"
-            logger.log_expectation("PASS", true)
+            logger.log_expectation("PASS", true, nil)
             resume_immediate = true
           end
         elseif event_filter:match("^ccmock:") then
@@ -245,13 +269,19 @@ return {
     periphemu.remove(MON_NAME)
   end,
 
+  set_monitor = function(monitor_name)
+    MON_NAME = monitor_name or MON_NAME
+  end,
+
   --- Setup the test runner's monitor
   setup = function()
     if not peripheral.isPresent(MON_NAME) then
       periphemu.create(MON_NAME, "monitor")
     end
     mon = peripheral.wrap(MON_NAME) --[[@as Monitor]]
-    mon.setSize(51, 20) -- Set the monitor size to one taller than the default term size, to account for our header.
+    if not no_periphemu then
+      mon.setSize(51, 20) -- Set the monitor size to one taller than the default term size, to account for our header.
+    end
     w, h = mon.getSize()
     mon_window = window.create(mon, 1, 2, w, h - 1)
   end

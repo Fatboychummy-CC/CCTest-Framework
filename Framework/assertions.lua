@@ -15,63 +15,70 @@ local function generate_for_both(name, func)
   methods.funcs["EXPECT_" .. name] = func("cctest:fail_expectation", "EXPECT_" .. name)
 end
 
+--- Get the caller of the function that called this function.
+---@return string caller The caller of the function that called this function.
+local function get_caller()
+  local info = debug.getinfo(3, "Sl")
+  return ("%s:%d"):format(info.short_src, info.currentline)
+end
+
 generate_for_both("TRUE", function(fail_event, name)
   return function(value)
     if value ~= true then
-      coroutine.yield(fail_event, name, ("Value %s is not true."):format(tostring(value)))
+      coroutine.yield(fail_event, get_caller(), name, ("Value %s is not true."):format(tostring(value)))
       return
     end
-    coroutine.yield("cctest:pass", name)
+    coroutine.yield("cctest:pass", get_caller(), name)
   end
 end)
 
 generate_for_both("FALSE", function(fail_event, name)
   return function(value)
     if value ~= false then
-      coroutine.yield(fail_event, name, ("Value %s is not false."):format(tostring(value)))
+      coroutine.yield(fail_event, get_caller(), name, ("Value %s is not false."):format(tostring(value)))
       return
     end
-    coroutine.yield("cctest:pass", name)
+    coroutine.yield("cctest:pass", get_caller(), name)
   end
 end)
 
 generate_for_both("NIL", function(fail_event, name)
   return function(value)
     if value ~= nil then
-      coroutine.yield(fail_event, name, ("Value %s is not nil."):format(tostring(value)))
+      coroutine.yield(fail_event, get_caller(), name, ("Value %s is not nil."):format(tostring(value)))
       return
     end
-    coroutine.yield("cctest:pass", name)
+    coroutine.yield("cctest:pass", get_caller(), name)
   end
 end)
 
 generate_for_both("NOT_NIL", function(fail_event, name)
   return function(value)
     if value == nil then
-      coroutine.yield(fail_event, name, ("Value %s is nil."):format(tostring(value)))
+      coroutine.yield(fail_event, get_caller(), name, ("Value %s is nil."):format(tostring(value)))
       return
     end
-    coroutine.yield("cctest:pass", name)
+    coroutine.yield("cctest:pass", get_caller(), name)
   end
 end)
 
 generate_for_both("TRUTHY", function(fail_event, name)
   return function(value)
     if not value then
-      coroutine.yield(fail_event, name, ("Value %s is not truthy."):format(tostring(value)))
+      coroutine.yield(fail_event, get_caller(), name, ("Value %s is not truthy."):format(tostring(value)))
       return
     end
-    coroutine.yield("cctest:pass", name)
+    coroutine.yield("cctest:pass", get_caller(), name)
   end
 end)
 
 generate_for_both("FALSY", function(fail_event, name)
   return function(value)
     if value then
-      coroutine.yield(fail_event, name, ("Value %s is not falsy."):format(tostring(value)))
+      coroutine.yield(fail_event, get_caller(), name, ("Value %s is not falsy."):format(tostring(value)))
       return
     end
-    coroutine.yield("cctest:pass", name)
+    coroutine.yield("cctest:pass", get_caller(), name)
   end
 end)
 
@@ -82,20 +89,20 @@ methods.funcs.EXPECT_FALSEY = methods.funcs.EXPECT_FALSY
 generate_for_both("EQ", function(fail_event, name)
   return function(expected, actual)
     if expected ~= actual then
-      coroutine.yield(fail_event, name, ("Values %s and %s are not equal."):format(tostring(expected), tostring(actual)))
+      coroutine.yield(fail_event, get_caller(), name, ("Values %s and %s are not equal."):format(tostring(expected), tostring(actual)))
       return
     end
-    coroutine.yield("cctest:pass", name)
+    coroutine.yield("cctest:pass", get_caller(), name)
   end
 end)
 
 generate_for_both("NEQ", function(fail_event, name)
   return function(expected, actual)
     if expected == actual then
-      coroutine.yield(fail_event, name, ("Values %s and %s are equal."):format(tostring(expected), tostring(actual)))
+      coroutine.yield(fail_event, get_caller(), name, ("Values %s and %s are equal."):format(tostring(expected), tostring(actual)))
       return
     end
-    coroutine.yield("cctest:pass", name)
+    coroutine.yield("cctest:pass", get_caller(), name)
   end
 end)
 
@@ -105,10 +112,10 @@ generate_for_both("THROWS", function(fail_event, name)
 
     local success, err = pcall(func, ...)
     if success then
-      coroutine.yield(fail_event, name, "Function did not throw an error.")
+      coroutine.yield(fail_event, get_caller(), name, "Function did not throw an error.")
       return
     end
-    coroutine.yield("cctest:pass", name)
+    coroutine.yield("cctest:pass", get_caller(), name)
   end
 end)
 
@@ -119,13 +126,13 @@ generate_for_both("THROWS_MATCH", function(fail_event, name)
 
     local success, err = pcall(func, ...)
     if success then
-      coroutine.yield(fail_event, name, "Function did not throw an error.")
+      coroutine.yield(fail_event, get_caller(), name, "Function did not throw an error.")
       return
     elseif not err:match(pattern) then
-      coroutine.yield(fail_event, name, ("Error %s did not match pattern %s."):format(err, pattern))
+      coroutine.yield(fail_event, get_caller(), name, ("Error %s did not match pattern %s."):format(err, pattern))
       return
     end
-    coroutine.yield("cctest:pass", name)
+    coroutine.yield("cctest:pass", get_caller(), name)
   end
 end)
 
@@ -135,10 +142,10 @@ generate_for_both("NO_THROW", function(fail_event, name)
 
     local success, err = pcall(func, ...)
     if not success then
-      coroutine.yield(fail_event, name, ("Function threw an error: %s."):format(err))
+      coroutine.yield(fail_event, get_caller(), name, ("Function threw an error: %s."):format(err))
       return
     end
-    coroutine.yield("cctest:pass", name)
+    coroutine.yield("cctest:pass", get_caller(), name)
   end
 end)
 
@@ -151,52 +158,52 @@ generate_for_both("TYPE", function(fail_event, name)
         expect(i + 1, expected[i], "string")
       end
       if actual == expected[i] then
-        coroutine.yield("cctest:pass", name)
+        coroutine.yield("cctest:pass", get_caller(), name)
         return
       end
     end
 
-    coroutine.yield(fail_event, name, ("Value %s is not of type %s."):format(tostring(actual), table.concat(expected, ", ")))
+    coroutine.yield(fail_event, get_caller(), name, ("Value %s is not of type %s."):format(tostring(actual), table.concat(expected, ", ")))
   end
 end)
 
 generate_for_both("GE", function(fail_event, name)
   return function(a, b)
     if a < b then
-      coroutine.yield(fail_event, name, ("Value %s is not greater than or equal to %s."):format(tostring(a), tostring(b)))
+      coroutine.yield(fail_event, get_caller(), name, ("Value %s is not greater than or equal to %s."):format(tostring(a), tostring(b)))
       return
     end
-    coroutine.yield("cctest:pass", name)
+    coroutine.yield("cctest:pass", get_caller(), name)
   end
 end)
 
 generate_for_both("GT", function(fail_event, name)
   return function(a, b)
     if a <= b then
-      coroutine.yield(fail_event, name, ("Value %s is not greater than %s."):format(tostring(a), tostring(b)))
+      coroutine.yield(fail_event, get_caller(), name, ("Value %s is not greater than %s."):format(tostring(a), tostring(b)))
       return
     end
-    coroutine.yield("cctest:pass", name)
+    coroutine.yield("cctest:pass", get_caller(), name)
   end
 end)
 
 generate_for_both("LE", function(fail_event, name)
   return function(a, b)
     if a > b then
-      coroutine.yield(fail_event, name, ("Value %s is not less than or equal to %s."):format(tostring(a), tostring(b)))
+      coroutine.yield(fail_event, get_caller(), name, ("Value %s is not less than or equal to %s."):format(tostring(a), tostring(b)))
       return
     end
-    coroutine.yield("cctest:pass", name)
+    coroutine.yield("cctest:pass", get_caller(), name)
   end
 end)
 
 generate_for_both("LT", function(fail_event, name)
   return function(a, b)
     if a >= b then
-      coroutine.yield(fail_event, name, ("Value %s is not less than %s."):format(tostring(a), tostring(b)))
+      coroutine.yield(fail_event, get_caller(), name, ("Value %s is not less than %s."):format(tostring(a), tostring(b)))
       return
     end
-    coroutine.yield("cctest:pass", name)
+    coroutine.yield("cctest:pass", get_caller(), name)
   end
 end)
 
@@ -208,10 +215,10 @@ generate_for_both("FLOAT_EQ", function(fail_event, name)
     epsilon = epsilon or 0.00001
 
     if math.abs(a - b) > epsilon then
-      coroutine.yield(fail_event, name, ("Values %s and %s are not equal within epsilon %s."):format(tostring(a), tostring(b), tostring(epsilon)))
+      coroutine.yield(fail_event, get_caller(), name, ("Values %s and %s are not equal within epsilon %s."):format(tostring(a), tostring(b), tostring(epsilon)))
       return
     end
-    coroutine.yield("cctest:pass", name)
+    coroutine.yield("cctest:pass", get_caller(), name)
   end
 end)
 
@@ -223,10 +230,10 @@ generate_for_both("FLOAT_NEQ", function(fail_event, name)
     epsilon = epsilon or 0.00001
 
     if math.abs(a - b) <= epsilon then
-      coroutine.yield(fail_event, name, ("Values %s and %s are equal within epsilon %s."):format(tostring(a), tostring(b), tostring(epsilon)))
+      coroutine.yield(fail_event, get_caller(), name, ("Values %s and %s are equal within epsilon %s."):format(tostring(a), tostring(b), tostring(epsilon)))
       return
     end
-    coroutine.yield("cctest:pass", name)
+    coroutine.yield("cctest:pass", get_caller(), name)
   end
 end)
 
@@ -241,12 +248,12 @@ generate_for_both("MATCH", function(fail_event, name)
         expect(i + 1, expected[i], "string")
       end
       if actual:match(expected[i]) then
-        coroutine.yield("cctest:pass", name)
+        coroutine.yield("cctest:pass", get_caller(), name)
         return
       end
     end
 
-    coroutine.yield(fail_event, name, ("Value %s does not match any of the patterns: %s."):format(tostring(actual), table.concat(expected, ", ")))
+    coroutine.yield(fail_event, get_caller(), name, ("Value %s does not match any of the patterns: %s."):format(tostring(actual), table.concat(expected, ", ")))
   end
 end)
 
@@ -273,10 +280,10 @@ generate_for_both("DEEP_EQ", function(fail_event, name)
     end
 
     if not eq_one_way(a, b) or not eq_one_way(b, a) then
-      coroutine.yield(fail_event, name, "Tables are not deeply equal.")
+      coroutine.yield(fail_event, get_caller(), name, "Tables are not deeply equal.")
       return
     end
-    coroutine.yield("cctest:pass", name)
+    coroutine.yield("cctest:pass", get_caller(), name)
   end
 end)
 
@@ -309,30 +316,30 @@ generate_for_both("TIMEOUT", function(fail_event, name)
     local end_time = os.epoch "utc"
 
     if killed then
-      coroutine.yield(fail_event, name, ("Function did not complete within %d seconds."):format(time))
+      coroutine.yield(fail_event, get_caller(), name, ("Function did not complete within %d seconds."):format(time))
       return
     end
 
 
     if end_time - start_time > time * 1000 then
-      coroutine.yield(fail_event, name, ("Function took %d seconds to complete, but should have taken less than %d seconds."):format((end_time - start_time) / 1000, time))
+      coroutine.yield(fail_event, get_caller(), name, ("Function took %d seconds to complete, but should have taken less than %d seconds."):format((end_time - start_time) / 1000, time))
       return
     end
 
-    coroutine.yield("cctest:pass", name)
+    coroutine.yield("cctest:pass", get_caller(), name)
   end
 end)
 
 methods.funcs.PASS = function()
-  coroutine.yield("cctest:force_pass")
+  coroutine.yield("cctest:force_pass", get_caller())
 end
 
 methods.funcs.FAIL = function(reason)
-  coroutine.yield("cctest:fail_expectation", "FAIL", reason or "Manual failure.")
+  coroutine.yield("cctest:fail_expectation", "FAIL", get_caller(), reason or "Manual failure.")
 end
 
 methods.funcs.END = function(reason)
-  coroutine.yield("cctest:fail_assertion", "END", reason or "Manual failure.")
+  coroutine.yield("cctest:fail_assertion", "END", get_caller(), reason or "Manual failure.")
 end
 
 --- Inject the methods into the global environment.
