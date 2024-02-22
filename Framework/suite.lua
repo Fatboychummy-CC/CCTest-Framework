@@ -295,9 +295,9 @@ function suite.load_tests(path)
   for _, file in ipairs(files) do
     local full_path = fs.combine(path, file)
 
-    if fs.isDir(full_path) then
+    if fs.isDir(full_path) then -- if directory, descend into it.
       suite.load_tests(full_path)
-    else
+    elseif file:sub(-4) == ".lua" then -- if this is a lua file, load it.
       load_file(full_path)
     end
   end
