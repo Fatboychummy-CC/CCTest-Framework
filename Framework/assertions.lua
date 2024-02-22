@@ -330,8 +330,8 @@ generate_for_both("TIMEOUT", function(fail_event, name)
   end
 end)
 
-methods.funcs.PASS = function()
-  coroutine.yield("cctest:force_pass", get_caller())
+methods.funcs.PASS = function(reason)
+  coroutine.yield("cctest:force_pass", "PASS", get_caller(), reason or "Passed.")
 end
 
 methods.funcs.FAIL = function(reason)

@@ -16,9 +16,6 @@ local CALLER_FORMATTER = "%s: %s"
 local periphemu = periphemu
 local no_periphemu = false
 
-local periphemu = periphemu
-local no_periphemu = false
-
 if not periphemu then
   no_periphemu = true
   periphemu = {
@@ -175,7 +172,7 @@ local function run_test(test, logger)
             -- On a force pass, the test should just be marked as a pass.
             test.status = "pass"
             logger.update_status "pass"
-            logger.log_expectation("PASS", true, nil)
+            logger.log_expectation("PASS", true, CALLER_FORMATTER:format(caller, message))
             resume_immediate = true
           end
         elseif event_filter:match("^ccmock:") then
