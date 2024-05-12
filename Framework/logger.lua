@@ -2,6 +2,8 @@
 
 local expect = require "cc.expect".expect --[[@as fun(a: number, b: any, ...: string)]]
 
+local blit_util = require "Framework.blit_util"
+
 ---@class logger
 ---@field current_test_name string? The name of the current test.
 ---@field current_status test_status? The status of the current test.
@@ -125,7 +127,7 @@ function logger.new_suite(name, test_count)
 
   print()
 
-  term.blit(
+  blit_util.write(
     combine_blit(
       { bmsg("Running suite ", WHITE, DEFAULT_BG_COLOR) },
       { bmsg(name, SUITE_NAME_COLOR, DEFAULT_BG_COLOR) },
@@ -145,7 +147,7 @@ function logger.close_suite(name)
 
   print()
 
-  term.blit(
+  blit_util.write(
     combine_blit(
       { bmsg("Finished suite ", WHITE, DEFAULT_BG_COLOR) },
       { bmsg(name, SUITE_NAME_COLOR, DEFAULT_BG_COLOR) },
@@ -172,7 +174,7 @@ function logger.new_test(name)
 
   local _; _, logger.y = term.getCursorPos()
   local text, text_color, bg_color = format_status(logger.current_status)
-  term.blit(
+  blit_util.write(
     combine_blit(
       text, text_color, bg_color,
       bmsg(logger.current_test_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR)
@@ -203,7 +205,7 @@ function logger.update_status(status)
     term.clearLine()
   end
 
-  term.blit(
+  blit_util.write(
     combine_blit(
       text, text_color, bg_color,
       bmsg(logger.current_test_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR)
@@ -235,7 +237,7 @@ function logger.log_expectation(expectation, passed, message)
     term.clearLine()
   end
 
-  term.blit(
+  blit_util.write(
     combine_blit(
       text, text_color, bg_color,
       { bmsg(logger.current_test_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR) },
@@ -277,7 +279,7 @@ function logger.log_assertion(assertion, passed, message)
     term.clearLine()
   end
 
-  term.blit(
+  blit_util.write(
     combine_blit(
       text, text_color, bg_color,
       { bmsg(logger.current_test_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR) },
@@ -303,7 +305,7 @@ function logger.log_error(error)
   -- Always print errors on new lines.
   print()
 
-  term.blit(
+  blit_util.write(
     combine_blit(
       { bmsg(logger.current_test_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR) },
       { bmsg(" | ", WHITE, DEFAULT_BG_COLOR) },
@@ -325,7 +327,7 @@ function logger.log_failure(failure)
   -- Always print failures on new lines.
   print()
 
-  term.blit(
+  blit_util.write(
     combine_blit(
       { bmsg(logger.current_test_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR) },
       { bmsg(" | ", WHITE, DEFAULT_BG_COLOR) },
@@ -345,7 +347,7 @@ function logger.log_stacktrace(stacktrace)
   -- Always print stacktraces on new lines.
   print()
 
-  term.blit(
+  blit_util.write(
     combine_blit(
       { bmsg(logger.current_test_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR) },
       { bmsg(" | ", WHITE, DEFAULT_BG_COLOR) },
@@ -394,7 +396,7 @@ function logger.log_results(suites)
   print()
 
   -- Start with the count of suites
-  term.blit(
+  blit_util.write(
     combine_blit(
       { bmsg("Ran ", WHITE, DEFAULT_BG_COLOR) },
       { bmsg(tostring(suite_count), SUITE_NAME_COLOR, DEFAULT_BG_COLOR) },
@@ -406,7 +408,7 @@ function logger.log_results(suites)
   for suite, suite_data in pairs(data) do
     if suite_data.failures > 0 then
       print()
-      term.blit(
+      blit_util.write(
         combine_blit(
           { bmsg("Suite ", WHITE, DEFAULT_BG_COLOR) },
           { bmsg(suite.name, SUITE_NAME_COLOR, DEFAULT_BG_COLOR) },
@@ -418,7 +420,7 @@ function logger.log_results(suites)
 
       for _, fail_name in ipairs(suite_data.fail_names) do
         print()
-        term.blit(
+        blit_util.write(
           combine_blit(
             { bmsg("  ", WHITE, DEFAULT_BG_COLOR) },
             { bmsg(fail_name, TEST_NAME_COLOR, DEFAULT_BG_COLOR) }
@@ -441,7 +443,7 @@ function logger.log_results(suites)
   -- Print the number of disabled tests.
   if disabled_tests > 0 then
     print()
-    term.blit(
+    blit_util.write(
       combine_blit(
         { bmsg(disabled_tests > 1 and "There were " or "There was ", WHITE, DEFAULT_BG_COLOR) },
         { bmsg(tostring(disabled_tests), FAILED_COLOR, DEFAULT_BG_COLOR) },
