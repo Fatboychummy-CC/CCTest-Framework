@@ -292,6 +292,8 @@ function suite.load_tests(path)
 
   -- Load and run all files in the folder.
   local files = fs.list(path)
+  table.sort(files)
+
   for _, file in ipairs(files) do
     local full_path = fs.combine(path, file)
 
